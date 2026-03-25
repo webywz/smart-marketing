@@ -1,0 +1,971 @@
+{
+  "materials": [
+    {
+      "id": "m1",
+      "name": "24夏大促_主KV_最终版.png",
+      "type": "image/png",
+      "url": "https://picsum.photos/seed/m1/600/400",
+      "thumbnail": "https://picsum.photos/seed/m1/150/150",
+      "size": 2048000,
+      "designer": "张三",
+      "creator": "李四",
+      "status": "disabled",
+      "folderId": "f1",
+      "tags": [
+        "S级",
+        "夏季大促"
+      ],
+      "platformTags": [
+        "高光影",
+        "明亮"
+      ],
+      "auditStatus": "approved",
+      "usageCount": 1542,
+      "platform1Usage": 1200,
+      "platform2Usage": 342,
+      "approvalRate": 99.5,
+      "isFavorite": true,
+      "createTime": "2024-05-02 11:00:00",
+      "updateTime": "2024-05-02 11:00:00"
+    },
+    {
+      "id": "m1772246674554",
+      "name": "新上传素材_34.jpg",
+      "type": "image/jpeg",
+      "url": "https://picsum.photos/seed/m1772246674554/600/400",
+      "thumbnail": "https://picsum.photos/seed/m1772246674554/150/150",
+      "size": 1048576,
+      "status": "enabled",
+      "folderId": "f1",
+      "tags": [],
+      "platformTags": [],
+      "auditStatus": "pending",
+      "usageCount": 0,
+      "platform1Usage": 0,
+      "platform2Usage": 0,
+      "approvalRate": 0,
+      "isFavorite": false,
+      "createTime": "2026-02-28 10:44:34",
+      "updateTime": "2026-02-28 10:44:34",
+      "designer": "张三",
+      "creator": "李四"
+    },
+    {
+      "id": "m1772247262506",
+      "name": "新上传素材_22.jpg",
+      "type": "image/jpeg",
+      "url": "https://picsum.photos/seed/m1772247262506/600/400",
+      "thumbnail": "https://picsum.photos/seed/m1772247262506/150/150",
+      "size": 1048576,
+      "status": "enabled",
+      "folderId": "f1",
+      "tags": [],
+      "platformTags": [],
+      "auditStatus": "pending",
+      "usageCount": 0,
+      "platform1Usage": 0,
+      "platform2Usage": 0,
+      "approvalRate": 0,
+      "isFavorite": false,
+      "createTime": "2026-02-28 10:54:22",
+      "updateTime": "2026-02-28 10:54:22",
+      "designer": "张三",
+      "creator": "李四"
+    },
+    {
+      "id": "m1772247271578",
+      "name": "新上传素材_31.jpg",
+      "type": "image/jpeg",
+      "url": "https://picsum.photos/seed/m1772247271578/600/400",
+      "thumbnail": "https://picsum.photos/seed/m1772247271578/150/150",
+      "size": 1048576,
+      "status": "enabled",
+      "folderId": "f1",
+      "tags": [],
+      "platformTags": [],
+      "auditStatus": "pending",
+      "usageCount": 0,
+      "platform1Usage": 0,
+      "platform2Usage": 0,
+      "approvalRate": 0,
+      "isFavorite": false,
+      "createTime": "2026-02-28 10:54:31",
+      "updateTime": "2026-02-28 10:54:31",
+      "designer": "张三",
+      "creator": "李四"
+    },
+    {
+      "id": "m1772247277610",
+      "name": "新上传素材_37.jpg",
+      "type": "image/jpeg",
+      "url": "https://picsum.photos/seed/m1772247277610/600/400",
+      "thumbnail": "https://picsum.photos/seed/m1772247277610/150/150",
+      "size": 1048576,
+      "status": "enabled",
+      "folderId": "f1",
+      "tags": [],
+      "platformTags": [],
+      "auditStatus": "pending",
+      "usageCount": 0,
+      "platform1Usage": 0,
+      "platform2Usage": 0,
+      "approvalRate": 0,
+      "isFavorite": false,
+      "createTime": "2026-02-28 10:54:37",
+      "updateTime": "2026-02-28 10:54:37",
+      "designer": "张三",
+      "creator": "李四"
+    },
+    {
+      "id": "m1772247284108",
+      "name": "新上传素材_44.jpg",
+      "type": "image/jpeg",
+      "url": "https://picsum.photos/seed/m1772247284108/600/400",
+      "thumbnail": "https://picsum.photos/seed/m1772247284108/150/150",
+      "size": 1048576,
+      "status": "enabled",
+      "folderId": "f1",
+      "tags": [],
+      "platformTags": [],
+      "auditStatus": "pending",
+      "usageCount": 0,
+      "platform1Usage": 0,
+      "platform2Usage": 0,
+      "approvalRate": 0,
+      "isFavorite": false,
+      "createTime": "2026-02-28 10:54:44",
+      "updateTime": "2026-02-28 10:54:44",
+      "designer": "张三",
+      "creator": "李四"
+    },
+    {
+      "id": "m1772248096093sqk7tn",
+      "name": "江南先生.png",
+      "type": "image/png",
+      "url": "https://picsum.photos/seed/m1772248096093sqk7tn/600/400",
+      "thumbnail": "https://picsum.photos/seed/m1772248096093sqk7tn/150/150",
+      "size": 127946,
+      "createTime": "2026-02-28 11:08:16",
+      "updateTime": "2026-02-28 11:08:16",
+      "designer": "上传者",
+      "creator": "上传者",
+      "status": "enabled",
+      "folderId": "f1",
+      "tags": [],
+      "platformTags": [],
+      "auditStatus": "pending",
+      "usageCount": 0,
+      "platform1Usage": 0,
+      "platform2Usage": 0,
+      "approvalRate": 0,
+      "isFavorite": false
+    }
+  ],
+  "albums": [
+    {
+      "id": "a1",
+      "name": "2024夏季大促",
+      "product": "智能手机X系列",
+      "author": "Admin",
+      "permissions": "Public",
+      "createTime": "2024-05-01 10:00:00",
+      "updateTime": "2026-02-28 10:23:43",
+      "materials": [
+        {
+          "id": "m1",
+          "name": "24夏大促_主KV_最终版.png",
+          "type": "image/png",
+          "url": "https://picsum.photos/seed/m1/600/400",
+          "thumbnail": "https://picsum.photos/seed/m1/150/150",
+          "size": 2048000,
+          "designer": "张三",
+          "creator": "李四",
+          "status": "enabled",
+          "folderId": "f1",
+          "tags": [
+            "S级",
+            "夏季大促"
+          ],
+          "platformTags": [
+            "高光影",
+            "明亮"
+          ],
+          "auditStatus": "approved",
+          "usageCount": 1542,
+          "platform1Usage": 1200,
+          "platform2Usage": 342,
+          "approvalRate": 99.5,
+          "isFavorite": true,
+          "createTime": "2024-05-02 11:00:00",
+          "updateTime": "2026-02-26 15:14:58",
+          "photographer": "看啊",
+          "actors": "刘德华",
+          "scriptwriter": "破破",
+          "introMaker": "噢噢"
+        },
+        {
+          "id": "m2",
+          "name": "品牌宣传_15s短视频.mp4",
+          "type": "video/mp4",
+          "url": "https://via.placeholder.com/600x400?text=Video",
+          "thumbnail": "https://via.placeholder.com/150?text=Video",
+          "size": 51200000,
+          "scriptwriter": "王五",
+          "photographer": "赵六",
+          "actors": "吴磊",
+          "introMaker": "特效组A",
+          "status": "enabled",
+          "folderId": "f2",
+          "tags": [
+            "品牌向"
+          ],
+          "platformTags": [
+            "年轻化",
+            "动感"
+          ],
+          "auditStatus": "pending",
+          "usageCount": 890,
+          "platform1Usage": 500,
+          "platform2Usage": 390,
+          "approvalRate": 85,
+          "isFavorite": false,
+          "createTime": "2024-05-10 09:00:00",
+          "updateTime": "2026-02-26 06:03:58",
+          "designer": "刘德华",
+          "creator": "张学友"
+        },
+        {
+          "id": "m17720902288922",
+          "name": "批量上传素材_3_93.jpg",
+          "type": "image/jpeg",
+          "url": "https://picsum.photos/seed/m17720902288922/600/400",
+          "thumbnail": "https://picsum.photos/seed/m17720902288922/150/150",
+          "size": 1024000,
+          "createTime": "2026-02-26 15:17:08",
+          "updateTime": "2026-02-28 10:23:43",
+          "designer": "上传者",
+          "creator": "上传者",
+          "status": "enabled",
+          "folderId": "upload",
+          "tags": [],
+          "platformTags": [],
+          "auditStatus": "pending",
+          "usageCount": 0,
+          "platform1Usage": 0,
+          "platform2Usage": 0,
+          "approvalRate": 0,
+          "isFavorite": false,
+          "itemType": "file",
+          "photographer": "刘德华"
+        }
+      ]
+    },
+    {
+      "id": "a2",
+      "name": "品牌形象升级",
+      "product": "全线产品",
+      "author": "Admin",
+      "permissions": "Private",
+      "createTime": "2024-01-10 10:00:00",
+      "updateTime": "2026-03-09 18:47:15",
+      "materials": [
+        {
+          "id": "m3",
+          "name": "Logo_源文件_2024版.ai",
+          "type": "application/postscript",
+          "url": "https://via.placeholder.com/600x400?text=Logo",
+          "thumbnail": "https://via.placeholder.com/150?text=Logo",
+          "size": 5120000,
+          "designer": "孙七",
+          "status": "disabled",
+          "folderId": "f3",
+          "tags": [
+            "基础物料",
+            "机密"
+          ],
+          "platformTags": [],
+          "auditStatus": "approved",
+          "usageCount": 50,
+          "platform1Usage": 10,
+          "platform2Usage": 40,
+          "approvalRate": 100,
+          "isFavorite": true,
+          "createTime": "2024-01-15 10:00:00",
+          "updateTime": "2026-02-28 10:24:06",
+          "itemType": "file",
+          "creator": "小张"
+        },
+        {
+          "id": "m17722474888194cmth9",
+          "name": "江南先生.png",
+          "type": "image/png",
+          "url": "https://picsum.photos/seed/m17722474888194cmth9/600/400",
+          "thumbnail": "https://picsum.photos/seed/m17722474888194cmth9/150/150",
+          "size": 127946,
+          "createTime": "2026-02-28 10:58:08",
+          "updateTime": "2026-02-28 10:58:08",
+          "designer": "上传者",
+          "creator": "上传者",
+          "status": "enabled",
+          "folderId": "upload",
+          "tags": [],
+          "platformTags": [],
+          "auditStatus": "pending",
+          "usageCount": 0,
+          "platform1Usage": 0,
+          "platform2Usage": 0,
+          "approvalRate": 0,
+          "isFavorite": false
+        }
+      ]
+    },
+    {
+      "id": "a1773053244390",
+      "author": "Admin",
+      "createTime": "2026-03-09 18:47:24",
+      "updateTime": "2026-03-09 18:47:39",
+      "materials": [
+        {
+          "id": "m1773053259299r8aosb",
+          "name": "250605.png",
+          "type": "image/png",
+          "url": "blob:http://localhost:8080/fc292d0c-2c7c-4254-8d7e-1a635142ced1",
+          "thumbnail": "blob:http://localhost:8080/fc292d0c-2c7c-4254-8d7e-1a635142ced1",
+          "size": 309512,
+          "createTime": "2026-03-09 18:47:39",
+          "updateTime": "2026-03-09 18:47:39",
+          "designer": "上传者",
+          "creator": "上传者",
+          "status": "enabled",
+          "folderId": "upload",
+          "tags": [],
+          "platformTags": [],
+          "auditStatus": "pending",
+          "usageCount": 0,
+          "platform1Usage": 0,
+          "platform2Usage": 0,
+          "approvalRate": 0,
+          "isFavorite": false
+        },
+        {
+          "id": "m17730532592994mjz4g",
+          "name": "250606.png",
+          "type": "image/png",
+          "url": "blob:http://localhost:8080/e8f4b4b6-5c0c-4070-b73d-268a45a4fa93",
+          "thumbnail": "blob:http://localhost:8080/e8f4b4b6-5c0c-4070-b73d-268a45a4fa93",
+          "size": 537322,
+          "createTime": "2026-03-09 18:47:39",
+          "updateTime": "2026-03-09 18:47:39",
+          "designer": "上传者",
+          "creator": "上传者",
+          "status": "enabled",
+          "folderId": "upload",
+          "tags": [],
+          "platformTags": [],
+          "auditStatus": "pending",
+          "usageCount": 0,
+          "platform1Usage": 0,
+          "platform2Usage": 0,
+          "approvalRate": 0,
+          "isFavorite": false
+        }
+      ],
+      "name": "test",
+      "product": "111",
+      "permissions": "Public"
+    }
+  ],
+  "tagGroups": [
+    {
+      "id": "g1",
+      "name": "优先级",
+      "createTime": "2024-01-01 10:00:00",
+      "updateTime": "2024-01-01 10:00:00"
+    },
+    {
+      "id": "g2",
+      "name": "活动属性",
+      "createTime": "2024-01-05 10:00:00",
+      "updateTime": "2024-01-05 10:00:00"
+    },
+    {
+      "id": "g3",
+      "name": "物料类型",
+      "createTime": "2024-02-01 10:00:00",
+      "updateTime": "2024-02-01 10:00:00"
+    }
+  ],
+  "tags": [
+    {
+      "id": "t1",
+      "name": "S级",
+      "groupId": "g1",
+      "materialCount": 154,
+      "createTime": "2024-01-01 10:00:00",
+      "updateTime": "2024-01-01 10:00:00"
+    },
+    {
+      "id": "t2",
+      "name": "A级",
+      "groupId": "g1",
+      "materialCount": 890,
+      "createTime": "2024-01-01 10:00:00",
+      "updateTime": "2024-01-01 10:00:00"
+    },
+    {
+      "id": "t3",
+      "name": "夏季大促",
+      "groupId": "g2",
+      "materialCount": 320,
+      "createTime": "2024-01-05 10:00:00",
+      "updateTime": "2024-01-05 10:00:00"
+    },
+    {
+      "id": "t4",
+      "name": "双十一",
+      "groupId": "g2",
+      "materialCount": 500,
+      "createTime": "2024-01-05 10:00:00",
+      "updateTime": "2024-01-05 10:00:00"
+    },
+    {
+      "id": "t5",
+      "name": "品牌向",
+      "groupId": "g3",
+      "materialCount": 120,
+      "createTime": "2024-02-01 10:00:00",
+      "updateTime": "2024-02-01 10:00:00"
+    }
+  ],
+  "folders": [
+    {
+      "id": "f1",
+      "name": "活动素材/2024大促"
+    },
+    {
+      "id": "f2",
+      "name": "视频库/品牌宣发"
+    },
+    {
+      "id": "f3",
+      "name": "VI视觉系统/源文件"
+    },
+    {
+      "id": "f4",
+      "name": "日常投放/图文"
+    }
+  ],
+  "personnel": {
+    "designers": [
+      "张三",
+      "孙七",
+      "周八"
+    ],
+    "creators": [
+      "李四",
+      "王九"
+    ],
+    "photographers": [
+      "赵六",
+      "钱十"
+    ],
+    "actors": [
+      "吴磊",
+      "张子枫",
+      "虚拟形象Alpha"
+    ],
+    "scriptwriters": [
+      "王五",
+      "郑十一"
+    ],
+    "introMakers": [
+      "特效组A",
+      "外包工作室B"
+    ]
+  },
+  "productGroups": [
+    {
+      "id": "1",
+      "name": "营销活动",
+      "createTime": "2023-10-01 10:00:00"
+    },
+    {
+      "id": "2",
+      "name": "落地页资产",
+      "createTime": "2023-10-02 11:30:00"
+    },
+    {
+      "id": "3",
+      "name": "广告创意",
+      "createTime": "2023-10-03 09:15:00"
+    }
+  ],
+  "products": [
+    {
+      "id": "1",
+      "name": "双十一大促活动A",
+      "groupId": 1,
+      "bid": 500,
+      "image": "https://picsum.photos/seed/1/150/150",
+      "status": "active",
+      "createTime": "2023-10-10 14:00:00"
+    },
+    {
+      "id": "2",
+      "name": "春季拉新落地页",
+      "groupId": 2,
+      "bid": 150.5,
+      "image": "https://picsum.photos/seed/2/150/150",
+      "status": "active",
+      "createTime": "2023-10-11 10:20:00"
+    },
+    {
+      "id": "3",
+      "name": "信息流视频素材-跑鞋",
+      "groupId": 3,
+      "bid": 1000,
+      "image": "https://picsum.photos/seed/3/150/150",
+      "status": "inactive",
+      "createTime": "2023-10-12 16:45:00"
+    },
+    {
+      "id": "4",
+      "name": "618预热营销方案",
+      "groupId": 1,
+      "bid": 200,
+      "image": "https://picsum.photos/seed/4/150/150",
+      "status": "active",
+      "createTime": "2023-10-13 09:30:00"
+    },
+    {
+      "id": "5",
+      "name": "APP下载引导页",
+      "groupId": "1",
+      "bid": 80,
+      "image": "https://picsum.photos/seed/5/150/150",
+      "status": "active",
+      "createTime": "2023-10-14 11:11:00"
+    },
+    {
+      "id": "6",
+      "name": "开屏广告-美妆",
+      "groupId": 3,
+      "bid": 1500,
+      "image": "https://picsum.photos/seed/6/150/150",
+      "status": "active",
+      "createTime": "2023-10-15 13:25:00"
+    },
+    {
+      "id": "7",
+      "name": "跨年狂欢活动池",
+      "groupId": 1,
+      "bid": 451.3,
+      "image": "https://picsum.photos/seed/7/150/150",
+      "status": "inactive",
+      "createTime": "2023-10-16 15:50:00"
+    },
+    {
+      "id": "8",
+      "name": "表单收集落地页(B端)",
+      "groupId": 2,
+      "bid": 25,
+      "image": "https://picsum.photos/seed/8/150/150",
+      "status": "active",
+      "createTime": "2023-10-17 08:40:00"
+    },
+    {
+      "id": "10",
+      "name": "日常促活活动",
+      "groupId": 1,
+      "bid": 30,
+      "image": "https://picsum.photos/seed/10/150/150",
+      "status": "active",
+      "createTime": "2023-10-19 14:30:00"
+    }
+  ],
+  "apps": [
+    {
+      "id": "app_1001",
+      "name": "电商极速版快应用",
+      "type": "快应用",
+      "productId": 1,
+      "os": "Android",
+      "downloadUrl": "hap://app/com.ecommerce.fast",
+      "subPackages": [
+        "/pages/home/index",
+        "/pages/cart/index"
+      ],
+      "syncStatus": "synced",
+      "createTime": "2023-11-01 10:00:00"
+    },
+    {
+      "id": "app_1002",
+      "name": "品牌特卖小程序",
+      "type": "小程序",
+      "productId": 2,
+      "os": "None",
+      "downloadUrl": "weixin://app/wx1234567890abcdef",
+      "subPackages": [
+        "/pkg_activity/pages/main"
+      ],
+      "syncStatus": "unsynced",
+      "createTime": "2023-11-02 14:30:00"
+    },
+    {
+      "id": "app_1005",
+      "name": "智能家居控制端",
+      "type": "鸿蒙",
+      "productId": 5,
+      "os": "None",
+      "downloadUrl": "appgallery://details?id=com.smarthome.harmony",
+      "subPackages": [],
+      "syncStatus": "synced",
+      "createTime": "2023-11-10 11:20:00"
+    }
+  ],
+  "targetingPackages": [
+    {
+      "id": "1",
+      "name": "定向包 A",
+      "createTime": "2023-10-01 10:00:00",
+      "image": "https://picsum.photos/seed/1/150/150"
+    },
+    {
+      "id": "2",
+      "name": "核心用户定向",
+      "createTime": "2023-10-02 11:30:00",
+      "image": "https://picsum.photos/seed/2/150/150"
+    },
+    {
+      "id": "1772431751885",
+      "name": "同步定向包_14_9",
+      "createTime": "2026-03-02 06:09:11"
+    },
+    {
+      "id": "1772431835017",
+      "name": "同步定向包_14_10",
+      "createTime": "2026-03-02 14:10:35"
+    },
+    {
+      "id": "1772781570401",
+      "name": "同步定向包_15_19",
+      "createTime": "2026-03-06 15:19:30"
+    }
+  ],
+  "titleLibraries": [
+    {
+      "id": "1",
+      "name": "通用标题组1",
+      "product": "产品A",
+      "titles": [
+        "爆款必买",
+        "限时折扣"
+      ],
+      "createTime": "2023-10-01 10:00:00"
+    },
+    {
+      "id": "2",
+      "name": "双十一预热",
+      "product": "产品B",
+      "titles": [
+        "全年最低价",
+        "马上抢"
+      ],
+      "createTime": "2023-10-10 14:00:00"
+    }
+  ],
+  "landingPages": [
+    {
+      "id": "101",
+      "name": "产品A主落地页",
+      "url": "https://example.com/a",
+      "product": "产品A",
+      "siteType": "移动端",
+      "advertiserId": "ADV_001",
+      "createTime": "2023-10-01 10:00:00",
+      "image": "https://picsum.photos/seed/101/150/150"
+    },
+    {
+      "id": "102",
+      "name": "产品B促销页",
+      "url": "https://example.com/b-sale",
+      "product": "产品B",
+      "siteType": "PC端",
+      "advertiserId": "ADV_002",
+      "createTime": "2023-10-15 16:20:00",
+      "image": "https://picsum.photos/seed/102/150/150"
+    },
+    {
+      "id": "1772437066363",
+      "name": "同步落地页_37",
+      "url": "https://example.com/sync",
+      "product": "同步产品",
+      "siteType": "移动端",
+      "advertiserId": "ADV_SYNC",
+      "createTime": "2026-03-02 15:37:46"
+    },
+    {
+      "id": "1773051031321",
+      "name": "同步落地页_10",
+      "url": "https://example.com/sync",
+      "product": "同步产品",
+      "siteType": "小程序",
+      "advertiserId": "ADV_SYNC",
+      "createTime": "2026-03-09 18:10:31"
+    }
+  ],
+  "keywordLibraries": [
+    {
+      "id": "1",
+      "name": "核心关键词",
+      "product": "产品A",
+      "keywords": [
+        "特价",
+        "包邮",
+        "正品"
+      ],
+      "createTime": "2023-09-01 10:00:00"
+    },
+    {
+      "id": "2",
+      "name": "长尾词测试",
+      "product": "产品A",
+      "keywords": [
+        "2024最新款",
+        "好用不贵"
+      ],
+      "createTime": "2023-09-05 10:00:00"
+    }
+  ],
+  "componentLibraries": [
+    {
+      "id": "1",
+      "name": "底部悬浮条",
+      "type": "转化组件",
+      "product": "全线产品",
+      "advertiserId": "ADV_ALL",
+      "createTime": "2023-08-01 10:00:00"
+    },
+    {
+      "id": "2",
+      "name": "商品卡片",
+      "type": "展示组件",
+      "product": "产品A",
+      "advertiserId": "ADV_001",
+      "createTime": "2023-08-10 10:00:00"
+    }
+  ],
+  "productLibraries": [
+    {
+      "id": "1",
+      "name": "经典爆款商品",
+      "libraryName": "春季爆款库",
+      "product": "产品A",
+      "advertiserId": "ADV_001",
+      "image": "https://picsum.photos/seed/1/150/150",
+      "video": "https://www.w3schools.com/html/mov_bbb.mp4",
+      "createTime": "2023-07-01 10:00:00"
+    },
+    {
+      "id": "2",
+      "name": "新款商品B",
+      "libraryName": "夏季上新",
+      "product": "产品B",
+      "advertiserId": "ADV_002",
+      "image": "https://picsum.photos/seed/2/150/150",
+      "video": "",
+      "createTime": "2023-07-15 10:00:00"
+    }
+  ],
+  "textSummaryLibraries": [
+    {
+      "id": "1",
+      "name": "卖点摘要组1",
+      "product": "产品A",
+      "summaries": [
+        "全网底价，不容错过",
+        "官方正品，假一赔十"
+      ],
+      "createTime": "2023-06-01 10:00:00"
+    },
+    {
+      "id": "2",
+      "name": "评价摘要",
+      "product": "产品B",
+      "summaries": [
+        "好评如潮，买过都说好"
+      ],
+      "createTime": "2023-06-10 10:00:00"
+    }
+  ],
+  "industryProducts": [
+    {
+      "id": "1",
+      "name": "教育类通用包",
+      "product": "在线课程A",
+      "advertiserId": "ADV_501",
+      "createTime": "2023-11-01 10:00:00",
+      "image": "https://picsum.photos/seed/1/150/150"
+    },
+    {
+      "id": "2",
+      "name": "游戏类推广包",
+      "product": "手游B",
+      "advertiserId": "ADV_502",
+      "createTime": "2023-11-02 11:30:00",
+      "image": "https://picsum.photos/seed/2/150/150"
+    },
+    {
+      "id": "1772431365830",
+      "name": "同步行业包_2",
+      "product": "同步产品",
+      "advertiserId": "ADV_SYNC",
+      "createTime": "2026-03-02 06:02:45"
+    },
+    {
+      "id": "1772431725706",
+      "name": "同步行业包_8",
+      "product": "同步产品",
+      "advertiserId": "ADV_SYNC",
+      "createTime": "2026-03-02 14:08:45"
+    },
+    {
+      "id": "1772781575816",
+      "name": "同步行业包_19",
+      "product": "同步产品",
+      "advertiserId": "ADV_SYNC",
+      "createTime": "2026-03-06 15:19:35"
+    }
+  ],
+  "brandImages": [
+    {
+      "id": "1",
+      "name": "品牌Logo主图",
+      "product": "全线产品",
+      "advertiserId": "ADV_ALL",
+      "image": "https://picsum.photos/seed/1/150/150",
+      "createTime": "2023-11-03 10:00:00"
+    },
+    {
+      "id": "2",
+      "name": "节日限定形象",
+      "product": "产品A",
+      "advertiserId": "ADV_501",
+      "image": "https://picsum.photos/seed/2/150/150",
+      "createTime": "2023-11-10 14:00:00"
+    }
+  ],
+  "avatarJumpPages": [
+    {
+      "id": "101",
+      "name": "官方号主页跳转",
+      "url": "https://jump.example.com/official",
+      "product": "全线产品",
+      "advertiserId": "ADV_ALL",
+      "createTime": "2023-11-01 10:00:00",
+      "avatar": "https://picsum.photos/seed/101/100/100"
+    },
+    {
+      "id": "102",
+      "name": "达人合作页",
+      "url": "https://jump.example.com/daren01",
+      "product": "产品A",
+      "advertiserId": "ADV_501",
+      "createTime": "2023-11-15 16:20:00",
+      "avatar": "https://picsum.photos/seed/102/100/100"
+    },
+    {
+      "id": "1773051091520",
+      "name": "同步跳转页_11",
+      "url": "https://jump.example.com/sync",
+      "product": "同步产品",
+      "advertiserId": "ADV_SYNC",
+      "createTime": "2026-03-09 10:11:31"
+    }
+  ],
+  "copywritingPackages": [
+    {
+      "id": "1",
+      "name": "双十二促销文案",
+      "product": "产品A",
+      "creator": "李白 (运营)",
+      "content": [
+        "全场半价，错过等一年",
+        "限时秒杀，数量有限"
+      ],
+      "createTime": "2023-10-01 10:00:00",
+      "image": "https://picsum.photos/seed/1/150/150"
+    },
+    {
+      "id": "2",
+      "name": "拉新迎新文案",
+      "product": "产品B",
+      "creator": "杜甫 (商务)",
+      "content": [
+        "新人注册送大礼",
+        "点击领取新人券"
+      ],
+      "createTime": "2023-10-05 10:00:00",
+      "image": "https://picsum.photos/seed/2/150/150"
+    }
+  ],
+  "landingPagesV2": [
+    {
+      "id": "1",
+      "name": "核心转化落地页",
+      "url": "https://example.com/p2/convert",
+      "product": "在线课程A",
+      "creator": "李清照 (前端)",
+      "createTime": "2023-11-01 10:00:00",
+      "image": "https://picsum.photos/seed/1/150/150"
+    },
+    {
+      "id": "2",
+      "name": "双十一活动页",
+      "url": "https://example.com/p2/1111",
+      "product": "产品A",
+      "creator": "辛弃疾 (UI)",
+      "createTime": "2023-10-20 10:00:00",
+      "image": "https://picsum.photos/seed/2/150/150"
+    }
+  ],
+  "targetingTemplates": [
+    {
+      "id": "1",
+      "name": "一二线城市白领模板",
+      "product": "全线产品",
+      "advertiserId": "ADV_ALL",
+      "conditions": [
+        "年龄: 25-35",
+        "地域: 一二线城市",
+        "兴趣: 科技、投资"
+      ],
+      "createTime": "2023-11-01 10:00:00",
+      "image": "https://picsum.photos/seed/1/150/150"
+    },
+    {
+      "id": "2",
+      "name": "下沉市场拉新模板",
+      "product": "产品B",
+      "advertiserId": "ADV_502",
+      "conditions": [
+        "年龄: 18-45",
+        "地域: 三四线城市",
+        "设备: 安卓"
+      ],
+      "createTime": "2023-11-10 10:00:00",
+      "image": "https://picsum.photos/seed/2/150/150"
+    },
+    {
+      "id": "1773048114235",
+      "name": "同步模板_21",
+      "product": "同步产品",
+      "advertiserId": "ADV_SYNC",
+      "conditions": [
+        "年龄: 20-30",
+        "地域: 一线城市"
+      ],
+      "createTime": "2026-03-09 09:21:54"
+    }
+  ]
+}
