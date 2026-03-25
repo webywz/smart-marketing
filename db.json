@@ -48,7 +48,11 @@
       "createTime": "2026-02-28 10:44:34",
       "updateTime": "2026-02-28 10:44:34",
       "designer": "张三",
-      "creator": "李四"
+      "creator": "李四",
+      "photographer": "赵六",
+      "actors": "吴磊",
+      "scriptwriter": "王五",
+      "introMaker": "特效组A"
     },
     {
       "id": "m1772247262506",
@@ -70,7 +74,11 @@
       "createTime": "2026-02-28 10:54:22",
       "updateTime": "2026-02-28 10:54:22",
       "designer": "张三",
-      "creator": "李四"
+      "creator": "李四",
+      "photographer": "钱十",
+      "actors": "张子枫",
+      "scriptwriter": "郑十一",
+      "introMaker": "外包工作室B"
     },
     {
       "id": "m1772247271578",
@@ -92,7 +100,11 @@
       "createTime": "2026-02-28 10:54:31",
       "updateTime": "2026-02-28 10:54:31",
       "designer": "张三",
-      "creator": "李四"
+      "creator": "李四",
+      "photographer": "赵六",
+      "actors": "虚拟形象Alpha",
+      "scriptwriter": "王五",
+      "introMaker": "特效组A"
     },
     {
       "id": "m1772247277610",
@@ -315,7 +327,11 @@
           "platform1Usage": 0,
           "platform2Usage": 0,
           "approvalRate": 0,
-          "isFavorite": false
+          "isFavorite": false,
+          "photographer": "钱十",
+          "actors": "张子枫",
+          "scriptwriter": "郑十一",
+          "introMaker": "外包工作室B"
         }
       ]
     },
@@ -345,7 +361,11 @@
           "platform1Usage": 0,
           "platform2Usage": 0,
           "approvalRate": 0,
-          "isFavorite": false
+          "isFavorite": false,
+          "photographer": "赵六",
+          "actors": "吴磊",
+          "scriptwriter": "王五",
+          "introMaker": "特效组A"
         },
         {
           "id": "m17730532592994mjz4g",
@@ -367,7 +387,11 @@
           "platform1Usage": 0,
           "platform2Usage": 0,
           "approvalRate": 0,
-          "isFavorite": false
+          "isFavorite": false,
+          "photographer": "钱十",
+          "actors": "虚拟形象Alpha",
+          "scriptwriter": "郑十一",
+          "introMaker": "外包工作室B"
         }
       ],
       "name": "test",

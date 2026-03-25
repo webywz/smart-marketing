@@ -116,6 +116,34 @@
             </el-form-item>
           </el-col>
           <el-col :span="6">
+            <el-form-item label="参演人员">
+              <el-select v-model="filters.actors" placeholder="选择参演人员" clearable>
+                <el-option v-for="p in personnelList.actors" :key="p" :label="p" :value="p" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="拍摄人员">
+              <el-select v-model="filters.photographer" placeholder="选择拍摄人员" clearable>
+                <el-option v-for="p in personnelList.photographers" :key="p" :label="p" :value="p" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="脚本人员">
+              <el-select v-model="filters.scriptwriter" placeholder="选择脚本人员" clearable>
+                <el-option v-for="p in personnelList.scriptwriters" :key="p" :label="p" :value="p" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="片头制作">
+              <el-select v-model="filters.introMaker" placeholder="选择片头制作" clearable>
+                <el-option v-for="p in personnelList.introMakers" :key="p" :label="p" :value="p" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
             <el-form-item label="收    藏">
               <el-switch v-model="filters.isFavorite" active-text="仅看收藏" />
             </el-form-item>
@@ -137,7 +165,7 @@
       <div class="action-left">
         <el-button type="primary" @click="handleUpload">上传素材</el-button>
         <el-button type="success" :loading="syncing" @click="handleSync">同步数据</el-button>
-        <el-button type="info" @click="handleExport">导出数据</el-button>
+        <el-button type="info" @click="openExportDialog">导出数据</el-button>
 
         <el-dropdown trigger="click" style="margin-left: 12px" :disabled="selectedIds.length === 0">
           <el-button type="warning">
@@ -451,6 +479,23 @@
         </div>
       </template>
     </el-dialog>
+    <el-dialog v-model="exportDialogVisible" title="导出字段选择" width="560px">
+      <el-space style="margin-bottom: 12px">
+        <el-button size="small" @click="selectAllExportFields">全选</el-button>
+        <el-button size="small" @click="resetExportFields">恢复默认</el-button>
+      </el-space>
+      <el-checkbox-group v-model="selectedExportFieldKeys" class="export-field-group">
+        <el-checkbox v-for="field in exportFieldOptions" :key="field.key" :value="field.key">
+          {{ field.label }}
+        </el-checkbox>
+      </el-checkbox-group>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="exportDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleExport">导出Excel</el-button>
+        </div>
+      </template>
+    </el-dialog>
 
     <!-- Advanced Mock Upload Dialog -->
     <el-dialog
@@ -505,6 +550,7 @@ const showAdvancedFilters = ref(false)
 const selectedIds = ref<string[]>([])
 const metaDialogVisible = ref(false)
 const metaForm = ref<Partial<Material>>({})
+const exportDialogVisible = ref(false)
 
 // Upload Dialog
 const uploadDialog = ref({ visible: false })
@@ -545,6 +591,50 @@ const personnelList = ref<{
   introMakers: [],
 })
 const platformTagList = ['高光影', '明亮', '年轻化', '动感', '促销', '教育'] // Could also be from API
+const exportFieldOptions: Array<{
+  key: string
+  label: string
+  getter: (item: Material) => string | number
+}> = [
+  { key: 'id', label: 'ID', getter: (item) => item.id },
+  { key: 'name', label: '名称', getter: (item) => item.name },
+  { key: 'type', label: '类型', getter: (item) => item.type },
+  {
+    key: 'status',
+    label: '状态',
+    getter: (item) => (item.status === 'enabled' ? '启用' : '禁用'),
+  },
+  { key: 'auditStatus', label: '审核状态', getter: (item) => getAuditLabel(item.auditStatus) },
+  { key: 'folder', label: '所属目录', getter: (item) => getFolderName(item.folderId) },
+  { key: 'tags', label: '标签', getter: (item) => getMergedTags(item).join('、') },
+  { key: 'usageCount', label: '总使用次数', getter: (item) => item.usageCount },
+  { key: 'platform1Usage', label: '平台1使用', getter: (item) => item.platform1Usage },
+  { key: 'platform2Usage', label: '平台2使用', getter: (item) => item.platform2Usage },
+  { key: 'approvalRate', label: '卡审率(%)', getter: (item) => item.approvalRate },
+  { key: 'createTime', label: '上传时间', getter: (item) => item.createTime },
+  { key: 'updateTime', label: '更新时间', getter: (item) => item.updateTime },
+  { key: 'designer', label: '设计师', getter: (item) => item.designer || '' },
+  { key: 'creator', label: '创意人', getter: (item) => item.creator || '' },
+  { key: 'actors', label: '参演人员', getter: (item) => item.actors || '' },
+  { key: 'photographer', label: '拍摄人员', getter: (item) => item.photographer || '' },
+  { key: 'scriptwriter', label: '脚本人员', getter: (item) => item.scriptwriter || '' },
+  { key: 'introMaker', label: '片头制作', getter: (item) => item.introMaker || '' },
+  { key: 'isFavorite', label: '已收藏', getter: (item) => (item.isFavorite ? '是' : '否') },
+]
+const defaultExportFieldKeys = [
+  'id',
+  'name',
+  'type',
+  'auditStatus',
+  'usageCount',
+  'platform1Usage',
+  'platform2Usage',
+  'createTime',
+  'updateTime',
+  'designer',
+  'creator',
+]
+const selectedExportFieldKeys = ref<string[]>([...defaultExportFieldKeys])
 
 // Pagination
 const currentPage = ref(1)
@@ -571,6 +661,10 @@ const filters = reactive({
   status: '',
   designer: '',
   creator: '',
+  actors: '',
+  photographer: '',
+  scriptwriter: '',
+  introMaker: '',
   isFavorite: false,
 })
 
@@ -607,6 +701,10 @@ const filteredList = computed(() => {
     if (filters.isFavorite && !m.isFavorite) return false
     if (filters.designer && m.designer !== filters.designer) return false
     if (filters.creator && m.creator !== filters.creator) return false
+    if (filters.actors && m.actors !== filters.actors) return false
+    if (filters.photographer && m.photographer !== filters.photographer) return false
+    if (filters.scriptwriter && m.scriptwriter !== filters.scriptwriter) return false
+    if (filters.introMaker && m.introMaker !== filters.introMaker) return false
 
     const selectedTags = Array.from(new Set([...filters.tags, ...filters.platformTags]))
     if (selectedTags.length > 0) {
@@ -690,6 +788,10 @@ const resetFilters = () => {
     status: '',
     designer: '',
     creator: '',
+    actors: '',
+    photographer: '',
+    scriptwriter: '',
+    introMaker: '',
     isFavorite: false,
   })
   handleSearch()
@@ -795,58 +897,57 @@ const submitUpload = async () => {
   }
 }
 
+const openExportDialog = () => {
+  if (filteredList.value.length === 0) {
+    ElMessage.warning('暂无数据可导出')
+    return
+  }
+  exportDialogVisible.value = true
+}
+
+const selectAllExportFields = () => {
+  selectedExportFieldKeys.value = exportFieldOptions.map((field) => field.key)
+}
+
+const resetExportFields = () => {
+  selectedExportFieldKeys.value = [...defaultExportFieldKeys]
+}
+
 const handleExport = () => {
   if (filteredList.value.length === 0) {
     ElMessage.warning('暂无数据可导出')
     return
   }
+  if (selectedExportFieldKeys.value.length === 0) {
+    ElMessage.warning('请至少选择一个导出字段')
+    return
+  }
 
-  // 1. Define Headers
-  const headers = [
-    'ID',
-    '名称',
-    '类型',
-    '审核状态',
-    '使用次数',
-    '平台1使用',
-    '平台2使用',
-    '创建时间',
-    '更新时间',
-    '设计师',
-    '创意人',
-  ]
-
-  // 2. Format Data
-  const data = filteredList.value.map((item) => [
-    item.id,
-    `"${item.name.replace(/"/g, '""')}"`, // Escape quotes
-    item.type,
-    item.auditStatus,
-    item.usageCount,
-    item.platform1Usage,
-    item.platform2Usage,
-    item.createTime,
-    item.updateTime,
-    item.designer || '',
-    item.creator || '',
-  ])
-
-  // 3. Combine to CSV String
-  const csvContent = [headers.join(','), ...data.map((row) => row.join(','))].join('\n')
-
-  // 4. Create Blob and Download
-  // Add BOM for Excel UTF-8 compatibility
-  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
+  const selectedFields = exportFieldOptions.filter((field) =>
+    selectedExportFieldKeys.value.includes(field.key),
+  )
+  const tableHead = selectedFields.map((field) => `<th>${escapeForHtml(field.label)}</th>`).join('')
+  const tableRows = filteredList.value
+    .map((item) => {
+      const cells = selectedFields
+        .map((field) => `<td>${escapeForHtml(field.getter(item))}</td>`)
+        .join('')
+      return `<tr>${cells}</tr>`
+    })
+    .join('')
+  const htmlContent = `<!DOCTYPE html><html><head><meta charset="UTF-8" /></head><body><table border="1"><thead><tr>${tableHead}</tr></thead><tbody>${tableRows}</tbody></table></body></html>`
+  const blob = new Blob(['\uFEFF' + htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.setAttribute('download', `material_export_${new Date().getTime()}.csv`)
+  link.setAttribute('download', `material_export_${new Date().getTime()}.xls`)
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
 
-  ElMessage.success(`已导出 ${data.length} 条数据`)
+  exportDialogVisible.value = false
+  ElMessage.success(`已导出 ${filteredList.value.length} 条数据`)
 }
 
 const handleSync = async () => {
@@ -1067,6 +1168,17 @@ const getAuditLabel = (status: string) => {
     .with('rejected', () => '已驳回')
     .otherwise(() => '待审核')
 }
+const getFolderName = (folderId: string) => {
+  const folder = folderList.value.find((item) => item.id === folderId)
+  return folder?.name || folderId
+}
+const escapeForHtml = (value: string | number) => {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
 </script>
 
 <style scoped lang="scss">
@@ -1098,6 +1210,13 @@ const getAuditLabel = (status: string) => {
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+
+  .export-field-group {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 10px;
+    column-gap: 8px;
   }
 
   .table-card {

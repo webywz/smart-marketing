@@ -117,6 +117,95 @@
               清空筛选
             </el-button>
           </div>
+          <div class="material-filter-row">
+            <span class="filter-label">素材筛选</span>
+            <el-select
+              v-model="materialFilters.actors"
+              class="material-filter-item"
+              placeholder="参演人员"
+              clearable
+              filterable
+            >
+              <el-option v-for="actor in actorOptions" :key="actor" :label="actor" :value="actor" />
+            </el-select>
+            <el-select
+              v-model="materialFilters.photographer"
+              class="material-filter-item"
+              placeholder="拍摄人员"
+              clearable
+              filterable
+            >
+              <el-option
+                v-for="photographer in photographerOptions"
+                :key="photographer"
+                :label="photographer"
+                :value="photographer"
+              />
+            </el-select>
+            <el-select
+              v-model="materialFilters.scriptwriter"
+              class="material-filter-item"
+              placeholder="脚本人员"
+              clearable
+              filterable
+            >
+              <el-option
+                v-for="scriptwriter in scriptwriterOptions"
+                :key="scriptwriter"
+                :label="scriptwriter"
+                :value="scriptwriter"
+              />
+            </el-select>
+            <el-select
+              v-model="materialFilters.introMaker"
+              class="material-filter-item"
+              placeholder="片头制作"
+              clearable
+              filterable
+            >
+              <el-option
+                v-for="introMaker in introMakerOptions"
+                :key="introMaker"
+                :label="introMaker"
+                :value="introMaker"
+              />
+            </el-select>
+            <el-select
+              v-model="materialFilters.usageTier"
+              class="material-filter-item"
+              placeholder="使用层级"
+              clearable
+            >
+              <el-option label="高价值（总使用≥500）" value="highValue" />
+              <el-option label="闲置（总使用≤10）" value="idle" />
+            </el-select>
+            <el-input-number
+              v-model="materialFilters.usageMin"
+              class="usage-input"
+              :min="0"
+              :controls="false"
+              placeholder="最小使用次数"
+            />
+            <el-input-number
+              v-model="materialFilters.usageMax"
+              class="usage-input"
+              :min="0"
+              :controls="false"
+              placeholder="最大使用次数"
+            />
+            <el-select
+              v-model="materialFilters.usageSort"
+              class="material-filter-item"
+              placeholder="使用次数排序"
+              clearable
+            >
+              <el-option label="总使用次数降序" value="usageDesc" />
+              <el-option label="总使用次数升序" value="usageAsc" />
+              <el-option label="平台1使用次数降序" value="platform1Desc" />
+              <el-option label="平台2使用次数降序" value="platform2Desc" />
+            </el-select>
+            <el-button link type="primary" @click="resetMaterialFilters">重置素材筛选</el-button>
+          </div>
         </div>
 
         <div class="materials-grid">
@@ -323,6 +412,17 @@ import { getCurrentTime } from '@/utils/time'
 const albums = ref<Album[]>([])
 const allFolders = ref<FolderType[]>([])
 const currentAlbum = ref<Album | null>(null)
+const personnelList = ref<{
+  photographers: string[]
+  actors: string[]
+  scriptwriters: string[]
+  introMakers: string[]
+}>({
+  photographers: [],
+  actors: [],
+  scriptwriters: [],
+  introMakers: [],
+})
 
 // Filters & Sorting
 const filters = ref({
@@ -332,6 +432,16 @@ const filters = ref({
 const sortBy = ref('updateDesc')
 const folderFilter = ref('')
 const uploadFolderId = ref('')
+const materialFilters = ref({
+  actors: '',
+  photographer: '',
+  scriptwriter: '',
+  introMaker: '',
+  usageTier: '',
+  usageMin: undefined as number | undefined,
+  usageMax: undefined as number | undefined,
+  usageSort: '',
+})
 
 const VIEW_CACHE_KEY = 'smart-marketing-album-view-cache'
 
@@ -441,12 +551,108 @@ const folderOptions = computed(() =>
 
 const folderNameIdMap = computed(() => new Map(allFolders.value.map((folder) => [folder.name, folder.id])))
 
+const buildPersonnelOptions = (
+  picker: (material: Material) => string | undefined,
+  materials: Material[],
+  fallback: string[],
+) =>
+  Array.from(
+    new Set([
+      ...fallback,
+      ...materials
+        .map((material) => picker(material))
+        .filter((name): name is string => Boolean(name)),
+    ]),
+  ).sort((a, b) => a.localeCompare(b, 'zh-CN'))
+
+const actorOptions = computed(() =>
+  buildPersonnelOptions(
+    (material) => material.actors,
+    currentAlbum.value?.materials || [],
+    personnelList.value.actors || [],
+  ),
+)
+const photographerOptions = computed(() =>
+  buildPersonnelOptions(
+    (material) => material.photographer,
+    currentAlbum.value?.materials || [],
+    personnelList.value.photographers || [],
+  ),
+)
+const scriptwriterOptions = computed(() =>
+  buildPersonnelOptions(
+    (material) => material.scriptwriter,
+    currentAlbum.value?.materials || [],
+    personnelList.value.scriptwriters || [],
+  ),
+)
+const introMakerOptions = computed(() =>
+  buildPersonnelOptions(
+    (material) => material.introMaker,
+    currentAlbum.value?.materials || [],
+    personnelList.value.introMakers || [],
+  ),
+)
+
+const filteredAlbumMaterials = computed(() => {
+  if (!currentAlbum.value) return []
+
+  const result = (currentAlbum.value.materials || []).filter((material) => {
+    if (materialFilters.value.actors && material.actors !== materialFilters.value.actors) return false
+    if (
+      materialFilters.value.photographer &&
+      material.photographer !== materialFilters.value.photographer
+    ) {
+      return false
+    }
+    if (
+      materialFilters.value.scriptwriter &&
+      material.scriptwriter !== materialFilters.value.scriptwriter
+    ) {
+      return false
+    }
+    if (materialFilters.value.introMaker && material.introMaker !== materialFilters.value.introMaker) {
+      return false
+    }
+
+    if (materialFilters.value.usageTier === 'highValue' && material.usageCount < 500) return false
+    if (materialFilters.value.usageTier === 'idle' && material.usageCount > 10) return false
+    if (
+      typeof materialFilters.value.usageMin === 'number' &&
+      material.usageCount < materialFilters.value.usageMin
+    ) {
+      return false
+    }
+    if (
+      typeof materialFilters.value.usageMax === 'number' &&
+      material.usageCount > materialFilters.value.usageMax
+    ) {
+      return false
+    }
+
+    return true
+  })
+
+  if (materialFilters.value.usageSort) {
+    result.sort((a, b) =>
+      match(materialFilters.value.usageSort)
+        .with('usageDesc', () => b.usageCount - a.usageCount)
+        .with('usageAsc', () => a.usageCount - b.usageCount)
+        .with('platform1Desc', () => b.platform1Usage - a.platform1Usage)
+        .with('platform2Desc', () => b.platform2Usage - a.platform2Usage)
+        .otherwise(() => 0),
+    )
+  }
+
+  return result
+})
+
 const itemsInCurrentView = computed<ViewItem[]>(() => {
   if (!currentAlbum.value) return []
 
   const allItems: ViewItem[] = []
   const seenFolders = new Set<string>()
-  const currentMaterials = currentAlbum.value.materials || []
+  const currentMaterials = filteredAlbumMaterials.value
   const folderMap = new Map(allFolders.value.map((f) => [f.id, f.name]))
   const path = effectivePath.value
 
@@ -487,6 +693,19 @@ const itemsInCurrentView = computed<ViewItem[]>(() => {
   return allItems
 })
 
+const resetMaterialFilters = () => {
+  materialFilters.value = {
+    actors: '',
+    photographer: '',
+    scriptwriter: '',
+    introMaker: '',
+    usageTier: '',
+    usageMin: undefined,
+    usageMax: undefined,
+    usageSort: '',
+  }
+}
+
 const emptyDescription = computed(() => {
   if (isFolderFilterActive.value) {
     return '当前档夹下暂无内容'
@@ -504,12 +723,19 @@ onMounted(async () => {
 
   // Load data
   try {
-    const [albumsRes, foldersRes] = await Promise.all([
+    const [albumsRes, foldersRes, personnelRes] = await Promise.all([
       request.get('/albums'),
       request.get('/folders'),
+      request.get('/personnel'),
     ])
     albums.value = (albumsRes as unknown as Album[]) || []
     allFolders.value = (foldersRes as unknown as FolderType[]) || []
+    personnelList.value = (personnelRes as typeof personnelList.value) || {
+      photographers: [],
+      actors: [],
+      scriptwriters: [],
+      introMakers: [],
+    }
   } catch (e) {
     ElMessage.error('获取基础数据失败')
   }
@@ -570,7 +796,7 @@ const submitAlbum = async () => {
               ...(albumForm.value as Album),
               updateTime: currentTime, // Ensure update time is current
             }
-            await request.put(`/albums/${albumForm.value.id}`, updatedAlbum)
+            await request.put(`/albums/${albumForm.value.id}`, updatedAlbum as any)
             albums.value[index] = updatedAlbum
             if (currentAlbum.value?.id === albumForm.value.id) {
               currentAlbum.value = updatedAlbum
@@ -999,6 +1225,21 @@ const submitMeta = async () => {
         white-space: nowrap;
         text-overflow: ellipsis;
       }
+    }
+
+    .material-filter-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .material-filter-item {
+      width: 180px;
+    }
+
+    .usage-input {
+      width: 140px;
     }
   }
 
