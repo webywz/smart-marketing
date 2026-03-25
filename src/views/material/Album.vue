@@ -13,7 +13,7 @@
           placeholder="按专辑名称筛选"
           clearable
           class="filter-item"
-          prefix-icon="Search"
+          :prefix-icon="Search"
         />
         <el-input
           v-model="filters.product"
@@ -83,14 +83,40 @@
 
         <!-- Materials Grid -->
         <div class="breadcrumb-container">
-          <el-breadcrumb separator=">">
-            <el-breadcrumb-item>
-              <a @click="navigateToPath(-1)">根目录</a>
-            </el-breadcrumb-item>
-            <el-breadcrumb-item v-for="(part, index) in breadcrumbParts" :key="index">
-              <a @click="navigateToPath(index)">{{ part }}</a>
-            </el-breadcrumb-item>
-          </el-breadcrumb>
+          <div class="breadcrumb-main">
+            <el-breadcrumb separator=">">
+              <el-breadcrumb-item>
+                <a @click="navigateToPath(-1)">根目录</a>
+              </el-breadcrumb-item>
+              <el-breadcrumb-item v-for="(part, index) in breadcrumbParts" :key="index">
+                <a @click="navigateToPath(index)">{{ part }}</a>
+              </el-breadcrumb-item>
+            </el-breadcrumb>
+          </div>
+          <div class="folder-filter-row">
+            <span class="filter-label">筛选档夹</span>
+            <el-select
+              v-model="folderFilter"
+              class="folder-filter"
+              placeholder="请选择档夹"
+              clearable
+              filterable
+              no-data-text="当前专辑暂无可筛选档夹"
+            >
+              <el-option
+                v-for="folder in albumFolderOptions"
+                :key="folder"
+                :label="folder"
+                :value="folder"
+              />
+            </el-select>
+            <el-tag v-if="isFolderFilterActive" class="active-filter-tag" size="small" type="success">
+              {{ folderFilter }}
+            </el-tag>
+            <el-button v-if="isFolderFilterActive" link type="primary" @click="folderFilter = ''">
+              清空筛选
+            </el-button>
+          </div>
         </div>
 
         <div class="materials-grid">
@@ -146,7 +172,7 @@
             </div>
           </el-checkbox-group>
         </div>
-        <el-empty v-if="itemsInCurrentView.length === 0" description="该文件夹下暂无内容" />
+        <el-empty v-if="itemsInCurrentView.length === 0" :description="emptyDescription" />
       </template>
       <el-empty
         v-else
@@ -186,6 +212,16 @@
     <!-- Material Metadata Edit Dialog -->
     <el-dialog v-model="metaDialog.visible" title="编辑素材元数据" width="500px">
       <el-form :model="metaForm" label-width="100px">
+        <el-form-item label="所属档夹">
+          <el-select v-model="metaForm.folderId" placeholder="请选择档夹" filterable>
+            <el-option
+              v-for="folder in folderOptions"
+              :key="folder.id"
+              :label="folder.name"
+              :value="folder.id"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="素材名称">
           <el-input v-model="metaForm.name" disabled />
         </el-form-item>
@@ -223,6 +259,24 @@
       width="400px"
       @close="handleUploadDialogClose"
     >
+      <el-form label-width="80px">
+        <el-form-item label="目标档夹">
+          <el-select
+            v-model="uploadFolderId"
+            placeholder="请选择档夹"
+            clearable
+            filterable
+            style="width: 100%"
+          >
+            <el-option
+              v-for="folder in folderOptions"
+              :key="folder.id"
+              :label="folder.name"
+              :value="folder.id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
       <el-upload
         ref="uploadRef"
         class="upload-demo"
@@ -251,7 +305,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { match } from 'ts-pattern'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, UploadFilled, Folder } from '@element-plus/icons-vue'
@@ -276,6 +330,41 @@ const filters = ref({
   product: '',
 })
 const sortBy = ref('updateDesc')
+const folderFilter = ref('')
+const uploadFolderId = ref('')
+
+const VIEW_CACHE_KEY = 'smart-marketing-album-view-cache'
+
+type AlbumViewCache = {
+  folderFilterByAlbum: Record<string, string>
+  uploadFolderId: string
+}
+
+const folderFilterByAlbum = ref<Record<string, string>>({})
+
+const readViewCache = (): AlbumViewCache | null => {
+  if (typeof window === 'undefined') return null
+  const raw = window.localStorage.getItem(VIEW_CACHE_KEY)
+  if (!raw) return null
+  try {
+    const parsed = JSON.parse(raw) as Partial<AlbumViewCache>
+    return {
+      folderFilterByAlbum: parsed.folderFilterByAlbum || {},
+      uploadFolderId: parsed.uploadFolderId || '',
+    }
+  } catch {
+    return null
+  }
+}
+
+const persistViewCache = () => {
+  if (typeof window === 'undefined') return
+  const payload: AlbumViewCache = {
+    folderFilterByAlbum: folderFilterByAlbum.value,
+    uploadFolderId: uploadFolderId.value,
+  }
+  window.localStorage.setItem(VIEW_CACHE_KEY, JSON.stringify(payload))
+}
 
 // Materials State
 const selectedMaterials = ref<string[]>([])
@@ -323,12 +412,34 @@ const filteredAlbums = computed(() => {
   return result
 })
 
+const effectivePath = computed(() => folderFilter.value || currentPath.value)
+const isFolderFilterActive = computed(() => Boolean(folderFilter.value))
+
 const breadcrumbParts = computed(() => {
-  if (currentPath.value === 'root') {
+  if (effectivePath.value === 'root') {
     return []
   }
-  return currentPath.value.split('/')
+  return effectivePath.value.split('/')
 })
+
+const albumFolderOptions = computed(() => {
+  if (!currentAlbum.value) return []
+
+  const folderMap = new Map(allFolders.value.map((f) => [f.id, f.name]))
+  return Array.from(
+    new Set(
+      currentAlbum.value.materials
+        .map((material) => folderMap.get(material.folderId))
+        .filter((folderPath): folderPath is string => Boolean(folderPath)),
+    ),
+  ).sort((a, b) => a.localeCompare(b, 'zh-CN'))
+})
+
+const folderOptions = computed(() =>
+  [...allFolders.value].sort((a, b) => a.name.localeCompare(b.name, 'zh-CN')),
+)
+
+const folderNameIdMap = computed(() => new Map(allFolders.value.map((folder) => [folder.name, folder.id])))
 
 const itemsInCurrentView = computed<ViewItem[]>(() => {
   if (!currentAlbum.value) return []
@@ -337,8 +448,9 @@ const itemsInCurrentView = computed<ViewItem[]>(() => {
   const seenFolders = new Set<string>()
   const currentMaterials = currentAlbum.value.materials || []
   const folderMap = new Map(allFolders.value.map((f) => [f.id, f.name]))
+  const path = effectivePath.value
 
-  if (currentPath.value === 'root') {
+  if (path === 'root') {
     currentMaterials.forEach((material) => {
       const folderPath = folderMap.get(material.folderId)
       if (folderPath) {
@@ -352,7 +464,7 @@ const itemsInCurrentView = computed<ViewItem[]>(() => {
       }
     })
   } else {
-    const currentPathPrefix = currentPath.value + '/'
+    const currentPathPrefix = path + '/'
     currentMaterials.forEach((material) => {
       const folderPath = folderMap.get(material.folderId)
       if (folderPath && folderPath.startsWith(currentPathPrefix)) {
@@ -362,11 +474,11 @@ const itemsInCurrentView = computed<ViewItem[]>(() => {
           allItems.push({
             itemType: 'folder',
             name: nextFolder,
-            path: `${currentPath.value}/${nextFolder}`,
+            path: `${path}/${nextFolder}`,
           })
           seenFolders.add(nextFolder)
         }
-      } else if (folderPath === currentPath.value) {
+      } else if (folderPath === path) {
         allItems.push({ ...material, itemType: 'file' })
       }
     })
@@ -375,8 +487,21 @@ const itemsInCurrentView = computed<ViewItem[]>(() => {
   return allItems
 })
 
+const emptyDescription = computed(() => {
+  if (isFolderFilterActive.value) {
+    return '当前档夹下暂无内容'
+  }
+  return effectivePath.value === 'root' ? '当前专辑暂无内容' : '该文件夹下暂无内容'
+})
+
 // --- Lifecycle ---
 onMounted(async () => {
+  const viewCache = readViewCache()
+  if (viewCache) {
+    folderFilterByAlbum.value = viewCache.folderFilterByAlbum || {}
+    uploadFolderId.value = viewCache.uploadFolderId || ''
+  }
+
   // Load data
   try {
     const [albumsRes, foldersRes] = await Promise.all([
@@ -391,14 +516,11 @@ onMounted(async () => {
 })
 
 // --- Actions ---
-const selectAlbum = (album: Album) => {
-  currentAlbum.value = album
-  currentPath.value = 'root' // Reset path when switching albums
-  selectedMaterials.value = [] // Reset selection
-}
-
 const handleItemClick = (item: any) => {
   if (item.itemType === 'folder') {
+    if (isFolderFilterActive.value) {
+      folderFilter.value = ''
+    }
     currentPath.value = item.path
   } else {
     // This is a file, you can add preview logic here if needed
@@ -407,11 +529,21 @@ const handleItemClick = (item: any) => {
 }
 
 const navigateToPath = (pathIndex: number) => {
-  if (pathIndex < 0) {
-    currentPath.value = 'root'
-  } else {
-    currentPath.value = breadcrumbParts.value.slice(0, pathIndex + 1).join('/')
+  const targetPath =
+    pathIndex < 0 ? 'root' : breadcrumbParts.value.slice(0, pathIndex + 1).join('/') || 'root'
+
+  if (isFolderFilterActive.value) {
+    folderFilter.value = ''
   }
+
+  currentPath.value = targetPath
+}
+
+const selectAlbum = (album: Album) => {
+  currentAlbum.value = album
+  currentPath.value = 'root' // Reset path when switching albums
+  folderFilter.value = folderFilterByAlbum.value[album.id] || ''
+  selectedMaterials.value = [] // Reset selection
 }
 
 const handleCreateAlbum = () => {
@@ -500,6 +632,10 @@ const handleSyncBot = () => {
 }
 
 const handleBatchUpload = () => {
+  if (!uploadFolderId.value || !folderOptions.value.find((folder) => folder.id === uploadFolderId.value)) {
+    const folderIdFromFilter = folderNameIdMap.value.get(folderFilter.value)
+    uploadFolderId.value = folderIdFromFilter || folderOptions.value[0]?.id || ''
+  }
   uploadDialog.value.visible = true
 }
 
@@ -514,6 +650,11 @@ const handleUploadDialogClose = () => {
 
 const submitUpload = async () => {
   if (currentAlbum.value && fileList.value.length > 0) {
+    if (!uploadFolderId.value) {
+      ElMessage.warning('请先选择目标档夹')
+      return
+    }
+
     const currentTime = getCurrentTime()
     const newMaterials: Material[] = []
 
@@ -533,7 +674,7 @@ const submitUpload = async () => {
         designer: '上传者',
         creator: '上传者',
         status: 'enabled',
-        folderId: 'upload', // Assign to a default folder
+        folderId: uploadFolderId.value,
         tags: [],
         platformTags: [],
         auditStatus: 'pending',
@@ -636,6 +777,28 @@ const handleEditMaterial = (material: Material) => {
   metaForm.value = { ...material }
   metaDialog.value.visible = true
 }
+
+watch(
+  [folderFilter, currentAlbum],
+  ([filterValue, album]) => {
+    if (!album) return
+    if (filterValue) {
+      folderFilterByAlbum.value[album.id] = filterValue
+    } else {
+      delete folderFilterByAlbum.value[album.id]
+    }
+    persistViewCache()
+  },
+  { deep: false },
+)
+
+watch(
+  uploadFolderId,
+  () => {
+    persistViewCache()
+  },
+  { deep: false },
+)
 
 const submitMeta = async () => {
   if (currentAlbum.value) {
@@ -793,11 +956,48 @@ const submitMeta = async () => {
     padding: 10px 20px;
     background-color: #fcfcfc;
     border-bottom: 1px solid #ebeef5;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .breadcrumb-main {
+      min-width: 0;
+    }
+
     a {
       cursor: pointer;
       font-weight: 500;
       &:hover {
         color: #409eff;
+      }
+    }
+
+    .folder-filter-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      font-size: 13px;
+      color: #606266;
+      white-space: nowrap;
+    }
+
+    .folder-filter {
+      width: 280px;
+    }
+
+    .active-filter-tag {
+      max-width: 320px;
+      :deep(.el-tag__content) {
+        display: block;
+        max-width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
       }
     }
   }

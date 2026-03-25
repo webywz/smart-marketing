@@ -14,9 +14,15 @@ let dbCache: DbStore | null = null
 
 const deepClone = <T>(value: T): T => {
   if (typeof structuredClone === 'function') {
-    return structuredClone(value)
+    try {
+      return structuredClone(value)
+    } catch {}
   }
-  return JSON.parse(JSON.stringify(value)) as T
+  try {
+    return JSON.parse(JSON.stringify(value)) as T
+  } catch {
+    return value
+  }
 }
 
 const normalizeUrl = (url: string) => {
