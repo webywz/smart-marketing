@@ -588,7 +588,7 @@ const submitAlbum = async () => {
             product: albumForm.value.product || '',
             permissions: albumForm.value.permissions || 'Public',
           }
-          await request.post('/albums', newAlbum)
+          await request.post('/albums', newAlbum as any)
           albums.value.unshift(newAlbum)
           ElMessage.success('专辑已创建')
         }

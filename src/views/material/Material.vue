@@ -223,7 +223,7 @@
         <el-table-column label="标签" min-width="150" show-overflow-tooltip>
           <template #default="{ row }">
             <el-space wrap>
-              <el-tag v-for="tag in row.tags" :key="tag" size="small">{{ tag }}</el-tag>
+              <el-tag v-for="tag in getMergedTags(row)" :key="tag" size="small">{{ tag }}</el-tag>
             </el-space>
           </template>
         </el-table-column>
@@ -575,6 +575,8 @@ const filters = reactive({
 })
 
 // --- Computed & Logic ---
+const getMergedTags = (material: Pick<Material, 'tags' | 'platformTags'>) =>
+  Array.from(new Set([...(material.tags || []), ...(material.platformTags || [])]))
 
 const filteredList = computed(() => {
   const result = materials.value.filter((m) => {
@@ -582,7 +584,7 @@ const filteredList = computed(() => {
     if (
       filters.keyword &&
       !m.name.includes(filters.keyword) &&
-      !m.tags.some((t) => t.includes(filters.keyword))
+      !getMergedTags(m).some((t) => t.includes(filters.keyword))
     ) {
       return false
     }
@@ -606,13 +608,11 @@ const filteredList = computed(() => {
     if (filters.designer && m.designer !== filters.designer) return false
     if (filters.creator && m.creator !== filters.creator) return false
 
-    // Array intersections
-    if (filters.tags.length > 0 && !filters.tags.every((t) => m.tags.includes(t))) return false
-    if (
-      filters.platformTags.length > 0 &&
-      !filters.platformTags.every((t) => m.platformTags.includes(t))
-    )
-      return false
+    const selectedTags = Array.from(new Set([...filters.tags, ...filters.platformTags]))
+    if (selectedTags.length > 0) {
+      const mergedTags = getMergedTags(m)
+      if (!selectedTags.some((tag) => mergedTags.includes(tag))) return false
+    }
 
     return true
   })
