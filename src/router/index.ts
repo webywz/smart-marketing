@@ -47,7 +47,7 @@ const router = createRouter({
             },
             {
               path: 'image-generation',
-              redirect: '/material/quick-image?tool=none_keys',
+              redirect: '/material/quick-image?tool=get_keys',
             },
             {
               path: 'icon-generation',

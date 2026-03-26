@@ -1002,7 +1002,17 @@ const handleUpload = () => {
 }
 
 const handleGenerateDerivedMaterial = () => {
-  router.push('/material/quick-image')
+  if (selectedIds.value.length === 0) {
+    ElMessage.warning('请先在列表中勾选要生成的素材')
+    return
+  }
+  router.push({
+    path: '/material/quick-image',
+    query: {
+      tool: 'get_keys',
+      ids: selectedIds.value.join(','),
+    },
+  })
 }
 
 const handleFileChange = (_: UploadUserFile, files: UploadUserFile[]) => {
