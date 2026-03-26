@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI模特换装任务页</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-slate-100 text-slate-800">
+    <main class="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
+      <div class="grid gap-6 lg:grid-cols-3">
+        <section class="rounded-2xl bg-white p-5 shadow-sm lg:col-span-2">
+          <h1 class="text-2xl font-semibold">AI模特换装</h1>
+          <p class="mt-2 text-sm text-slate-500">支持图片与视频两类素材上传，创建任务后可直接查询任务状态。</p>
+          <div class="mt-5 grid gap-4 md:grid-cols-2">
+            <label class="block text-sm md:col-span-2">
+              <span class="mb-1 block font-medium">文案指令</span>
+              <textarea id="prompt" rows="4" class="w-full rounded-xl border border-slate-200 px-3 py-2 outline-none ring-blue-500 focus:ring">全程使用视频1的第一视角构图，生成模特换装效果，确保画面自然。</textarea>
+            </label>
+            <label class="block text-sm">
+              <span class="mb-1 block font-medium">比例</span>
+              <select id="ratio" class="w-full rounded-xl border border-slate-200 px-3 py-2 outline-none ring-blue-500 focus:ring">
+                <option value="16:9" selected>16:9</option>
+                <option value="9:16">9:16</option>
+                <option value="1:1">1:1</option>
+              </select>
+            </label>
+            <label class="block text-sm">
+              <span class="mb-1 block font-medium">时长（秒）</span>
+              <input id="duration" type="number" min="1" max="30" class="w-full rounded-xl border border-slate-200 px-3 py-2 outline-none ring-blue-500 focus:ring" value="11" />
+            </label>
+          </div>
+
+          <div class="mt-6 rounded-2xl border border-slate-200 p-4">
+            <div class="flex items-center justify-between">
+              <h2 class="text-base font-semibold">图片素材（主类别1）</h2>
+              <button id="addImageBtn" class="cursor-pointer rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-blue-700">添加图片</button>
+            </div>
+            <div class="mt-3 space-y-3" id="imageList"></div>
+          </div>
+
+          <div class="mt-4 rounded-2xl border border-slate-200 p-4">
+            <div class="flex items-center justify-between">
+              <h2 class="text-base font-semibold">视频素材（主类别2）</h2>
+              <button id="addVideoBtn" class="cursor-pointer rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-indigo-700">添加视频</button>
+            </div>
+            <div class="mt-3 space-y-3" id="videoList"></div>
+          </div>
+
+          <div class="mt-6 flex flex-wrap gap-3">
+            <button id="submitTaskBtn" class="cursor-pointer rounded-xl bg-slate-900 px-4 py-2 font-medium text-white transition-colors duration-200 hover:bg-black">创建换装任务</button>
+            <button id="queryTaskBtn" class="cursor-pointer rounded-xl border border-slate-300 bg-white px-4 py-2 font-medium transition-colors duration-200 hover:bg-slate-50">查询任务状态</button>
+          </div>
+        </section>
+
+        <section class="rounded-2xl bg-white p-5 shadow-sm">
+          <h2 class="text-lg font-semibold">任务状态</h2>
+          <label class="mt-4 block text-sm">
+            <span class="mb-1 block font-medium">任务ID</span>
+            <input id="taskId" class="w-full rounded-xl border border-slate-200 px-3 py-2 outline-none ring-blue-500 focus:ring" placeholder="创建任务后会自动填充" />
+          </label>
+          <div class="mt-4 rounded-xl bg-slate-900 p-3 text-xs text-slate-100">
+            <pre id="payloadView" class="max-h-56 overflow-auto whitespace-pre-wrap break-all"></pre>
+          </div>
+          <div class="mt-4 rounded-xl bg-slate-900 p-3 text-xs text-green-300">
+            <pre id="resultView" class="max-h-80 overflow-auto whitespace-pre-wrap break-all">等待操作...</pre>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <template id="assetRowTpl">
+      <div class="rounded-xl border border-slate-200 p-3">
+        <div class="grid gap-2 md:grid-cols-[140px_1fr_auto]">
+          <select data-role="sourceType" class="rounded-lg border border-slate-200 px-2 py-2 text-sm outline-none ring-blue-500 focus:ring">
+            <option value="url" selected>URL</option>
+            <option value="file">本地文件</option>
+          </select>
+          <input data-role="urlInput" class="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring" placeholder="请输入素材URL" />
+          <button data-role="removeBtn" class="cursor-pointer rounded-lg border border-slate-300 px-3 py-2 text-sm transition-colors duration-200 hover:bg-slate-50">删除</button>
+        </div>
+        <input data-role="fileInput" type="file" class="mt-2 hidden w-full rounded-lg border border-slate-200 px-2 py-2 text-sm" />
+        <p data-role="fileName" class="mt-2 text-xs text-slate-500"></p>
+      </div>
+    </template>
+
+    <script>
+      const APP_CONFIG = {
+        baseUrl: 'http://zlhub.xiaowaiyou.cn/zhonglian/api/v1/proxy/ark',
+        uploadUrl: 'https://zlhub.xiaowaiyou.cn/zhonglian/api/v1/storage/upload',
+        model: 'doubao-seedance-2.0',
+        token: 'Bearer sk-qaTo2rCaRLCXGZ6U2tCrnwSK92UKXGQk4gFxozNEdADA4kzl'
+      }
+
+      const state = {
+        images: [],
+        videos: []
+      }
+
+      const dom = {
+        prompt: document.getElementById('prompt'),
+        ratio: document.getElementById('ratio'),
+        duration: document.getElementById('duration'),
+        imageList: document.getElementById('imageList'),
+        videoList: document.getElementById('videoList'),
+        taskId: document.getElementById('taskId'),
+        payloadView: document.getElementById('payloadView'),
+        resultView: document.getElementById('resultView'),
+        addImageBtn: document.getElementById('addImageBtn'),
+        addVideoBtn: document.getElementById('addVideoBtn'),
+        submitTaskBtn: document.getElementById('submitTaskBtn'),
+        queryTaskBtn: document.getElementById('queryTaskBtn'),
+        assetRowTpl: document.getElementById('assetRowTpl')
+      }
+
+      function createAssetItem(kind) {
+        return {
+          id: `${kind}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+          kind,
+          sourceType: 'url',
+          url: '',
+          file: null
+        }
+      }
+
+      function addAsset(kind) {
+        const item = createAssetItem(kind)
+        state[kind].push(item)
+        renderAssets(kind)
+      }
+
+      function removeAsset(kind, id) {
+        state[kind] = state[kind].filter((item) => item.id !== id)
+        renderAssets(kind)
+      }
+
+      function getListElement(kind) {
+        if (kind === 'images') return dom.imageList
+        return dom.videoList
+      }
+
+      function getAcceptByKind(kind) {
+        if (kind === 'images') return 'image/*'
+        return 'video/*'
+      }
+
+      function renderAssets(kind) {
+        const listEl = getListElement(kind)
+        listEl.innerHTML = ''
+        if (!state[kind].length) {
+          const empty = document.createElement('p')
+          empty.className = 'text-sm text-slate-400'
+          empty.textContent = '暂无素材，请点击上方按钮添加。'
+          listEl.appendChild(empty)
+          return
+        }
+
+        state[kind].forEach((item) => {
+          const node = dom.assetRowTpl.content.firstElementChild.cloneNode(true)
+          const sourceType = node.querySelector('[data-role="sourceType"]')
+          const urlInput = node.querySelector('[data-role="urlInput"]')
+          const fileInput = node.querySelector('[data-role="fileInput"]')
+          const fileName = node.querySelector('[data-role="fileName"]')
+          const removeBtn = node.querySelector('[data-role="removeBtn"]')
+
+          sourceType.value = item.sourceType
+          urlInput.value = item.url
+          fileInput.accept = getAcceptByKind(kind)
+          fileName.textContent = item.file ? item.file.name : ''
+
+          if (item.sourceType === 'file') {
+            urlInput.classList.add('hidden')
+            fileInput.classList.remove('hidden')
+          } else {
+            urlInput.classList.remove('hidden')
+            fileInput.classList.add('hidden')
+          }
+
+          sourceType.addEventListener('change', (e) => {
+            item.sourceType = e.target.value
+            renderAssets(kind)
+          })
+          urlInput.addEventListener('input', (e) => {
+            item.url = e.target.value.trim()
+          })
+          fileInput.addEventListener('change', (e) => {
+            item.file = e.target.files?.[0] || null
+            fileName.textContent = item.file ? item.file.name : ''
+          })
+          removeBtn.addEventListener('click', () => removeAsset(kind, item.id))
+
+          listEl.appendChild(node)
+        })
+      }
+
+      function normalizeBaseUrl(baseUrl) {
+        return baseUrl.replace(/\/+$/, '')
+      }
+
+      async function buildMediaContent(kind, typeName, role) {
+        const rows = state[kind]
+        const items = []
+        for (const row of rows) {
+          if (row.sourceType === 'url') {
+            if (!row.url) continue
+            items.push({
+              type: typeName,
+              [typeName]: { url: row.url },
+              role
+            })
+          } else if (row.file) {
+            const uploadedUrl = await uploadLocalFile(row.file)
+            items.push({
+              type: typeName,
+              [typeName]: { url: uploadedUrl },
+              role
+            })
+          }
+        }
+        return items
+      }
+
+      async function buildPayload() {
+        const imageItems = await buildMediaContent('images', 'image_url', 'reference_image')
+        const videoItems = await buildMediaContent('videos', 'video_url', 'reference_video')
+
+        if (!imageItems.length && !videoItems.length) {
+          throw new Error('请至少上传或填写一个图片/视频素材')
+        }
+
+        return {
+          model: APP_CONFIG.model,
+          content: [
+            {
+              type: 'text',
+              text: dom.prompt.value.trim()
+            },
+            ...imageItems,
+            ...videoItems
+          ],
+          generate_audio: false,
+          ratio: dom.ratio.value,
+          duration: Number(dom.duration.value) || 11,
+          watermark: false
+        }
+      }
+
+      function getAuthHeader() {
+        const token = APP_CONFIG.token.trim()
+        if (!token) throw new Error('请在APP_CONFIG.token中写死Token')
+        return `Bearer ${token}`
+      }
+
+      async function requestJson(url, options) {
+        const res = await fetch(url, options)
+        const text = await res.text()
+        let data = null
+        try {
+          data = text ? JSON.parse(text) : null
+        } catch {
+          data = { raw: text }
+        }
+        if (!res.ok) {
+          throw new Error(`请求失败(${res.status})：${JSON.stringify(data)}`)
+        }
+        return data
+      }
+
+      async function uploadLocalFile(file) {
+        const formData = new FormData()
+        formData.append('file', file)
+        const data = await requestJson(APP_CONFIG.uploadUrl, {
+          method: 'POST',
+          body: formData
+        })
+        if (data?.code !== 0 || !data?.data?.url) {
+          throw new Error(`上传失败：${JSON.stringify(data)}`)
+        }
+        return data.data.url
+      }
+
+      function extractTaskId(resp) {
+        return resp?.id || resp?.task_id || resp?.data?.id || resp?.data?.task_id || ''
+      }
+
+      async function handleSubmitTask() {
+        try {
+          const payload = await buildPayload()
+          dom.payloadView.textContent = JSON.stringify(payload, null, 2)
+          const baseUrl = normalizeBaseUrl(APP_CONFIG.baseUrl)
+          const url = `${baseUrl}/contents/generations/tasks`
+          const data = await requestJson(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: getAuthHeader()
+            },
+            body: JSON.stringify(payload)
+          })
+          const taskId = extractTaskId(data)
+          if (taskId) dom.taskId.value = taskId
+          dom.resultView.textContent = `任务创建成功\n${JSON.stringify(data, null, 2)}`
+        } catch (err) {
+          dom.resultView.textContent = `任务创建失败\n${err.message}`
+        }
+      }
+
+      async function handleQueryTask() {
+        try {
+          const id = dom.taskId.value.trim()
+          if (!id) throw new Error('请先填写任务ID')
+          const baseUrl = normalizeBaseUrl(APP_CONFIG.baseUrl)
+          const url = `${baseUrl}/contents/generations/tasks/${id}`
+          const data = await requestJson(url, {
+            method: 'GET',
+            headers: {
+              Authorization: getAuthHeader()
+            }
+          })
+          dom.resultView.textContent = `任务查询成功\n${JSON.stringify(data, null, 2)}`
+        } catch (err) {
+          dom.resultView.textContent = `任务查询失败\n${err.message}`
+        }
+      }
+
+      dom.addImageBtn.addEventListener('click', () => addAsset('images'))
+      dom.addVideoBtn.addEventListener('click', () => addAsset('videos'))
+      dom.submitTaskBtn.addEventListener('click', handleSubmitTask)
+      dom.queryTaskBtn.addEventListener('click', handleQueryTask)
+
+      addAsset('images')
+      addAsset('videos')
+    </script>
+  </body>
+</html>
