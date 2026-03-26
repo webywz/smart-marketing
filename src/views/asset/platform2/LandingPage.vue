@@ -129,7 +129,6 @@ import { Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import request from '@/utils/request'
-import { mockLandingPagesV2 } from '@/mock/platform2Data'
 import type { LandingPageV2 } from '@/mock/platform2Data'
 
 // State
@@ -151,6 +150,19 @@ const pageSize = ref(10)
 const total = ref(0)
 const pageSizes = ref([10, 20, 50, 100])
 const customPageSizeInput = ref<number>()
+
+const fetchData = async () => {
+  loading.value = true
+  try {
+    const res = await request.get('/landingPagesV2')
+    allData.value = (res as LandingPageV2[]) || []
+    filterData()
+  } catch (e) {
+    ElMessage.error('获取落地页数据失败')
+  } finally {
+    loading.value = false
+  }
+}
 
 // Edit Dialog State
 const dialogVisible = ref(false)
@@ -174,8 +186,7 @@ const rules = reactive<FormRules>({
 })
 
 onMounted(() => {
-  allData.value = [...mockLandingPagesV2]
-  filterData()
+  fetchData()
 })
 
 const paginatedData = computed(() => {
