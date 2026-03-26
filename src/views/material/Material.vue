@@ -1105,7 +1105,7 @@ const loadTableColumnSettings = () => {
   try {
     const savedKeys = JSON.parse(raw) as string[]
     if (!Array.isArray(savedKeys)) return
-    const availableKeys = new Set(defaultTableColumnKeys)
+    const availableKeys = new Set<string>(defaultTableColumnKeys)
     const nextKeys = savedKeys.filter((key) => availableKeys.has(key))
     if (!nextKeys.includes('platform2Usage')) {
       nextKeys.push('platform2Usage')
