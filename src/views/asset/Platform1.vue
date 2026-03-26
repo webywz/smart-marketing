@@ -57,6 +57,7 @@ const handleTabClick = (tab: TabsPaneContext) => {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
   
   .page-header {
     margin-bottom: 20px;
@@ -69,26 +70,30 @@ const handleTabClick = (tab: TabsPaneContext) => {
 
   .main-content {
     flex: 1;
+    min-height: 0;
     background-color: var(--el-bg-color);
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: auto;
 
     .platform-tabs {
       flex: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
 
       :deep(.el-tabs__content) {
         flex: 1;
-        overflow: hidden;
+        min-height: 0;
+        overflow-y: auto;
         padding: 16px 0 0 0;
         
         .el-tab-pane {
           height: 100%;
+          min-height: 0;
         }
       }
     }
