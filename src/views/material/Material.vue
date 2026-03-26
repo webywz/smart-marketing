@@ -557,12 +557,36 @@
             <el-option v-for="p in personnelList.photographers" :key="p" :label="p" :value="p" />
           </el-select>
         </el-form-item>
+        <el-form-item label="脚本人员">
+          <el-select
+            v-model="batchPersonnelForm.scriptwriter"
+            placeholder="不修改"
+            clearable
+            filterable
+            allow-create
+            style="width: 100%"
+          >
+            <el-option v-for="p in personnelList.scriptwriters" :key="p" :label="p" :value="p" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="参演人员">
           <el-input
             v-model="batchPersonnelForm.actors"
             placeholder="不修改（如：吴磊,虚拟形象Alpha）"
             clearable
           />
+        </el-form-item>
+        <el-form-item label="片头制作">
+          <el-select
+            v-model="batchPersonnelForm.introMaker"
+            placeholder="不修改"
+            clearable
+            filterable
+            allow-create
+            style="width: 100%"
+          >
+            <el-option v-for="p in personnelList.introMakers" :key="p" :label="p" :value="p" />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -661,12 +685,16 @@ const batchPersonnelForm = ref<{
   designer: string
   creator: string
   photographer: string
+  scriptwriter: string
   actors: string
+  introMaker: string
 }>({
   designer: '',
   creator: '',
   photographer: '',
+  scriptwriter: '',
   actors: '',
+  introMaker: '',
 })
 
 // Dictionaries (loaded from backend)
@@ -1237,13 +1265,19 @@ const submitBatchMove = async () => {
 
 const submitBatchPersonnel = async () => {
   const updates: Partial<
-    Pick<Material, 'designer' | 'creator' | 'photographer' | 'actors' | 'updateTime'>
+    Pick<
+      Material,
+      'designer' | 'creator' | 'photographer' | 'scriptwriter' | 'actors' | 'introMaker' | 'updateTime'
+    >
   > = {}
   if (batchPersonnelForm.value.designer) updates.designer = batchPersonnelForm.value.designer
   if (batchPersonnelForm.value.creator) updates.creator = batchPersonnelForm.value.creator
   if (batchPersonnelForm.value.photographer)
     updates.photographer = batchPersonnelForm.value.photographer
+  if (batchPersonnelForm.value.scriptwriter)
+    updates.scriptwriter = batchPersonnelForm.value.scriptwriter
   if (batchPersonnelForm.value.actors) updates.actors = batchPersonnelForm.value.actors
+  if (batchPersonnelForm.value.introMaker) updates.introMaker = batchPersonnelForm.value.introMaker
 
   if (Object.keys(updates).length === 0) {
     ElMessage.warning('未修改任何信息')
@@ -1316,7 +1350,14 @@ const batchAction = async (action: string) => {
         return Promise.resolve()
       })
       .with('personnel', () => {
-        batchPersonnelForm.value = { designer: '', creator: '', photographer: '', actors: '' }
+        batchPersonnelForm.value = {
+          designer: '',
+          creator: '',
+          photographer: '',
+          scriptwriter: '',
+          actors: '',
+          introMaker: '',
+        }
         batchPersonnelDialogVisible.value = true
         return Promise.resolve()
       })
