@@ -320,6 +320,13 @@
           width="120"
         />
         <el-table-column
+          v-if="isColumnVisible('platform2Usage')"
+          prop="platform2Usage"
+          label="平台2使用"
+          sortable="custom"
+          width="120"
+        />
+        <el-table-column
           v-if="isColumnVisible('approvalRate')"
           prop="approvalRate"
           label="卡审率 (%)"
@@ -769,6 +776,7 @@ const tableColumnOptions = [
   { key: 'createTime', label: '上传时间', fixed: false },
   { key: 'usageCount', label: '总使用次数', fixed: false },
   { key: 'platform1Usage', label: '平台1使用', fixed: false },
+  { key: 'platform2Usage', label: '平台2使用', fixed: false },
   { key: 'approvalRate', label: '卡审率 (%)', fixed: false },
   { key: 'tags', label: '标签', fixed: false },
 ] as const
@@ -1089,6 +1097,9 @@ const loadTableColumnSettings = () => {
     if (!Array.isArray(savedKeys)) return
     const availableKeys = new Set(defaultTableColumnKeys)
     const nextKeys = savedKeys.filter((key) => availableKeys.has(key))
+    if (!nextKeys.includes('platform2Usage')) {
+      nextKeys.push('platform2Usage')
+    }
     if (nextKeys.length > 0) {
       selectedTableColumnKeys.value = Array.from(new Set([...fixedTableColumnKeys, ...nextKeys]))
     }
