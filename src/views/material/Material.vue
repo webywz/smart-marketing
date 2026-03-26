@@ -557,6 +557,13 @@
             <el-option v-for="p in personnelList.photographers" :key="p" :label="p" :value="p" />
           </el-select>
         </el-form-item>
+        <el-form-item label="参演人员">
+          <el-input
+            v-model="batchPersonnelForm.actors"
+            placeholder="不修改（如：吴磊,虚拟形象Alpha）"
+            clearable
+          />
+        </el-form-item>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -654,10 +661,12 @@ const batchPersonnelForm = ref<{
   designer: string
   creator: string
   photographer: string
+  actors: string
 }>({
   designer: '',
   creator: '',
   photographer: '',
+  actors: '',
 })
 
 // Dictionaries (loaded from backend)
@@ -1227,11 +1236,14 @@ const submitBatchMove = async () => {
 }
 
 const submitBatchPersonnel = async () => {
-  const updates: any = {}
+  const updates: Partial<
+    Pick<Material, 'designer' | 'creator' | 'photographer' | 'actors' | 'updateTime'>
+  > = {}
   if (batchPersonnelForm.value.designer) updates.designer = batchPersonnelForm.value.designer
   if (batchPersonnelForm.value.creator) updates.creator = batchPersonnelForm.value.creator
   if (batchPersonnelForm.value.photographer)
     updates.photographer = batchPersonnelForm.value.photographer
+  if (batchPersonnelForm.value.actors) updates.actors = batchPersonnelForm.value.actors
 
   if (Object.keys(updates).length === 0) {
     ElMessage.warning('未修改任何信息')
@@ -1304,7 +1316,7 @@ const batchAction = async (action: string) => {
         return Promise.resolve()
       })
       .with('personnel', () => {
-        batchPersonnelForm.value = { designer: '', creator: '', photographer: '' }
+        batchPersonnelForm.value = { designer: '', creator: '', photographer: '', actors: '' }
         batchPersonnelDialogVisible.value = true
         return Promise.resolve()
       })
