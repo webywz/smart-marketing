@@ -47,11 +47,11 @@ const router = createRouter({
             },
             {
               path: 'image-generation',
-              redirect: '/material/quick-image',
+              redirect: '/material/quick-image?tool=none_keys',
             },
             {
               path: 'icon-generation',
-              redirect: '/material/quick-image',
+              redirect: '/material/quick-image?tool=text2icon',
             },
           ],
         },
