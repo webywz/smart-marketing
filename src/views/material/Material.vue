@@ -191,6 +191,7 @@
     <div class="action-bar">
       <div class="action-left">
         <el-button type="primary" @click="handleUpload">上传素材</el-button>
+        <el-button type="warning" @click="handleGenerateDerivedMaterial">生成衍生素材</el-button>
         <el-button type="success" :loading="syncing" @click="handleSync">同步数据</el-button>
         <el-button type="info" @click="openExportDialog">导出数据</el-button>
 
@@ -618,6 +619,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowDown, StarFilled, UploadFilled } from '@element-plus/icons-vue'
 import { match } from 'ts-pattern'
@@ -641,6 +643,7 @@ const exportDialogVisible = ref(false)
 const uploadDialog = ref({ visible: false })
 const uploadRef = ref<UploadInstance>()
 const fileList = ref<UploadUserFile[]>([])
+const router = useRouter()
 
 // Batch Dialogs
 const batchMoveDialogVisible = ref(false)
@@ -951,6 +954,10 @@ const handleSelectionChange = (val: Material[]) => {
 // Actions
 const handleUpload = () => {
   uploadDialog.value.visible = true
+}
+
+const handleGenerateDerivedMaterial = () => {
+  router.push('/material/quick-image')
 }
 
 const handleFileChange = (_: UploadUserFile, files: UploadUserFile[]) => {

@@ -45,6 +45,14 @@ const router = createRouter({
               component: () => import('@/views/material/QuickImage.vue'),
               meta: { title: '图片快速生产' },
             },
+            {
+              path: 'image-generation',
+              redirect: '/material/quick-image',
+            },
+            {
+              path: 'icon-generation',
+              redirect: '/material/quick-image',
+            },
           ],
         },
         {
