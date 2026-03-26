@@ -51,10 +51,12 @@
               v-model="filters.groupId"
               placeholder="全部分组"
               clearable
+              filterable
+              :filter-method="handleGroupFilter"
               @change="handleSearch"
             >
               <el-option label="全部分组" value="" />
-              <el-option v-for="g in groups" :key="g.id" :label="g.name" :value="g.id" />
+              <el-option v-for="g in searchableGroups" :key="g.id" :label="g.name" :value="g.id" />
             </el-select>
           </el-form-item>
           <el-form-item>
@@ -205,6 +207,7 @@ const filters = reactive({
   keyword: '',
   groupId: '',
 })
+const groupFilterKeyword = ref('')
 
 // Pagination
 const currentPage = ref(1)
@@ -250,6 +253,16 @@ const paginatedTags = computed(() => {
   totalTags.value = filteredTags.value.length
   const start = (currentPage.value - 1) * pageSize.value
   return filteredTags.value.slice(start, start + pageSize.value)
+})
+
+const searchableGroups = computed(() => {
+  const kw = groupFilterKeyword.value.trim().toLowerCase()
+  if (!kw) return groups.value
+  const matched = groups.value.filter((g) => g.name.toLowerCase().includes(kw))
+  if (!filters.groupId) return matched
+  const selected = groups.value.find((g) => g.id === filters.groupId)
+  if (!selected || matched.some((g) => g.id === selected.id)) return matched
+  return [selected, ...matched]
 })
 
 // --- Lifecycle ---
@@ -354,9 +367,14 @@ const handleSearch = () => {
   currentPage.value = 1
 }
 
+const handleGroupFilter = (query: string) => {
+  groupFilterKeyword.value = query
+}
+
 const resetSearch = () => {
   filters.keyword = ''
   filters.groupId = ''
+  groupFilterKeyword.value = ''
   currentGroupId.value = ''
   currentPage.value = 1
 }
