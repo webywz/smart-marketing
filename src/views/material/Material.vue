@@ -102,6 +102,33 @@
             </el-form-item>
           </el-col>
           <el-col :span="6">
+            <el-form-item label="使用层级">
+              <el-select v-model="filters.usageTier" placeholder="选择层级" clearable>
+                <el-option label="高价值（总使用≥500）" value="highValue" />
+                <el-option label="闲置（总使用≤10）" value="idle" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="使用区间">
+              <div class="usage-range">
+                <el-input-number
+                  v-model="filters.usageMin"
+                  :min="0"
+                  :controls="false"
+                  placeholder="最小值"
+                />
+                <span class="range-separator">-</span>
+                <el-input-number
+                  v-model="filters.usageMax"
+                  :min="0"
+                  :controls="false"
+                  placeholder="最大值"
+                />
+              </div>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
             <el-form-item label="设 计 师">
               <el-select v-model="filters.designer" placeholder="选择设计师" clearable>
                 <el-option v-for="p in personnelList.designers" :key="p" :label="p" :value="p" />
@@ -734,6 +761,9 @@ const filters = reactive({
   platformTags: [] as string[],
   auditStatus: '',
   status: '',
+  usageTier: '',
+  usageMin: undefined as number | undefined,
+  usageMax: undefined as number | undefined,
   designer: '',
   creator: '',
   actors: '',
@@ -773,6 +803,11 @@ const filteredList = computed(() => {
     if (filters.folderId && m.folderId !== filters.folderId) return false
     if (filters.auditStatus && m.auditStatus !== filters.auditStatus) return false
     if (filters.status && m.status !== filters.status) return false
+    const usageCount = Number(m.usageCount || 0)
+    if (filters.usageTier === 'highValue' && usageCount < 500) return false
+    if (filters.usageTier === 'idle' && usageCount > 10) return false
+    if (typeof filters.usageMin === 'number' && usageCount < filters.usageMin) return false
+    if (typeof filters.usageMax === 'number' && usageCount > filters.usageMax) return false
     if (filters.isFavorite && !m.isFavorite) return false
     if (filters.designer && m.designer !== filters.designer) return false
     if (filters.creator && m.creator !== filters.creator) return false
@@ -862,6 +897,9 @@ const resetFilters = () => {
     platformTags: [],
     auditStatus: '',
     status: '',
+    usageTier: '',
+    usageMin: undefined,
+    usageMax: undefined,
     designer: '',
     creator: '',
     actors: '',
@@ -1320,6 +1358,21 @@ const escapeForHtml = (value: string | number) => {
     .el-form-item {
       margin-bottom: 12px;
       width: 100%;
+    }
+
+    .usage-range {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+
+      .el-input-number {
+        flex: 1;
+      }
+
+      .range-separator {
+        color: #909399;
+      }
     }
   }
 
