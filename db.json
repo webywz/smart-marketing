@@ -674,6 +674,66 @@
       "id": "1772781570401",
       "name": "同步定向包_15_19",
       "createTime": "2026-03-06 15:19:30"
+    },
+    {
+      "id": "3",
+      "name": "高潜人群定向",
+      "createTime": "2023-10-03 09:20:00",
+      "image": "https://picsum.photos/seed/3/150/150"
+    },
+    {
+      "id": "4",
+      "name": "复购用户定向",
+      "createTime": "2023-10-04 14:10:00",
+      "image": "https://picsum.photos/seed/4/150/150"
+    },
+    {
+      "id": "5",
+      "name": "新品兴趣定向",
+      "createTime": "2023-10-06 11:45:00",
+      "image": "https://picsum.photos/seed/5/150/150"
+    },
+    {
+      "id": "6",
+      "name": "品牌词关注人群",
+      "createTime": "2023-10-07 18:05:00",
+      "image": "https://picsum.photos/seed/6/150/150"
+    },
+    {
+      "id": "7",
+      "name": "夜间活跃用户",
+      "createTime": "2023-10-08 21:15:00",
+      "image": "https://picsum.photos/seed/7/150/150"
+    },
+    {
+      "id": "8",
+      "name": "大促会场定向",
+      "createTime": "2023-10-09 08:35:00",
+      "image": "https://picsum.photos/seed/8/150/150"
+    },
+    {
+      "id": "9",
+      "name": "高客单人群包",
+      "createTime": "2023-10-11 16:25:00",
+      "image": "https://picsum.photos/seed/9/150/150"
+    },
+    {
+      "id": "10",
+      "name": "视频互动人群",
+      "createTime": "2023-10-12 12:00:00",
+      "image": "https://picsum.photos/seed/10/150/150"
+    },
+    {
+      "id": "11",
+      "name": "搜索加购人群",
+      "createTime": "2023-10-13 10:50:00",
+      "image": "https://picsum.photos/seed/11/150/150"
+    },
+    {
+      "id": "12",
+      "name": "潜客拓新人群",
+      "createTime": "2023-10-14 13:30:00",
+      "image": "https://picsum.photos/seed/12/150/150"
     }
   ],
   "titleLibraries": [
@@ -696,6 +756,106 @@
         "马上抢"
       ],
       "createTime": "2023-10-10 14:00:00"
+    },
+    {
+      "id": "3",
+      "name": "直播间主推",
+      "product": "产品C",
+      "titles": [
+        "开播即爆单",
+        "库存告急快下单"
+      ],
+      "createTime": "2023-10-11 09:00:00"
+    },
+    {
+      "id": "4",
+      "name": "新品首发标题组",
+      "product": "产品A",
+      "titles": [
+        "新品首发限量抢",
+        "先到先得不补货"
+      ],
+      "createTime": "2023-10-12 10:20:00"
+    },
+    {
+      "id": "5",
+      "name": "节日礼赠主题",
+      "product": "产品D",
+      "titles": [
+        "送礼就选这款",
+        "节日福利直降"
+      ],
+      "createTime": "2023-10-13 11:15:00"
+    },
+    {
+      "id": "6",
+      "name": "高转化促销组",
+      "product": "产品E",
+      "titles": [
+        "立减50元仅今天",
+        "手慢无最后机会"
+      ],
+      "createTime": "2023-10-14 12:30:00"
+    },
+    {
+      "id": "7",
+      "name": "口碑背书标题组",
+      "product": "产品B",
+      "titles": [
+        "10万用户共同选择",
+        "口碑爆棚强烈推荐"
+      ],
+      "createTime": "2023-10-15 13:45:00"
+    },
+    {
+      "id": "8",
+      "name": "价格优势组",
+      "product": "产品C",
+      "titles": [
+        "同款更低价",
+        "省钱也能买到好货"
+      ],
+      "createTime": "2023-10-16 14:50:00"
+    },
+    {
+      "id": "9",
+      "name": "人群定制标题",
+      "product": "产品F",
+      "titles": [
+        "专为学生党打造",
+        "上班族通勤必备"
+      ],
+      "createTime": "2023-10-17 15:10:00"
+    },
+    {
+      "id": "10",
+      "name": "会员专享活动",
+      "product": "产品A",
+      "titles": [
+        "会员专享额外折上折",
+        "专属礼包限量发放"
+      ],
+      "createTime": "2023-10-18 16:25:00"
+    },
+    {
+      "id": "11",
+      "name": "冲量标题组",
+      "product": "产品G",
+      "titles": [
+        "爆卖冲榜进行中",
+        "今日下单享惊喜"
+      ],
+      "createTime": "2023-10-19 17:30:00"
+    },
+    {
+      "id": "12",
+      "name": "季末清仓组",
+      "product": "产品H",
+      "titles": [
+        "季末清仓低至3折",
+        "售完即止不再补"
+      ],
+      "createTime": "2023-10-20 18:40:00"
     }
   ],
   "landingPages": [
@@ -736,6 +896,106 @@
       "siteType": "小程序",
       "advertiserId": "ADV_SYNC",
       "createTime": "2026-03-09 18:10:31"
+    },
+    {
+      "id": "103",
+      "name": "产品C品牌页",
+      "url": "https://example.com/c-brand",
+      "product": "产品C",
+      "siteType": "PC端",
+      "advertiserId": "ADV_003",
+      "createTime": "2023-10-16 09:10:00",
+      "image": "https://picsum.photos/seed/103/150/150"
+    },
+    {
+      "id": "104",
+      "name": "产品D短链页",
+      "url": "https://example.com/d-short",
+      "product": "产品D",
+      "siteType": "移动端",
+      "advertiserId": "ADV_004",
+      "createTime": "2023-10-17 10:20:00",
+      "image": "https://picsum.photos/seed/104/150/150"
+    },
+    {
+      "id": "105",
+      "name": "产品E直播承接页",
+      "url": "https://example.com/e-live",
+      "product": "产品E",
+      "siteType": "小程序",
+      "advertiserId": "ADV_005",
+      "createTime": "2023-10-18 11:30:00",
+      "image": "https://picsum.photos/seed/105/150/150"
+    },
+    {
+      "id": "106",
+      "name": "产品F活动落地页",
+      "url": "https://example.com/f-campaign",
+      "product": "产品F",
+      "siteType": "移动端",
+      "advertiserId": "ADV_006",
+      "createTime": "2023-10-19 12:40:00",
+      "image": "https://picsum.photos/seed/106/150/150"
+    },
+    {
+      "id": "107",
+      "name": "产品G转化页",
+      "url": "https://example.com/g-convert",
+      "product": "产品G",
+      "siteType": "PC端",
+      "advertiserId": "ADV_007",
+      "createTime": "2023-10-20 13:50:00",
+      "image": "https://picsum.photos/seed/107/150/150"
+    },
+    {
+      "id": "108",
+      "name": "产品H加购页",
+      "url": "https://example.com/h-cart",
+      "product": "产品H",
+      "siteType": "移动端",
+      "advertiserId": "ADV_008",
+      "createTime": "2023-10-21 14:10:00",
+      "image": "https://picsum.photos/seed/108/150/150"
+    },
+    {
+      "id": "109",
+      "name": "产品I新品页",
+      "url": "https://example.com/i-new",
+      "product": "产品I",
+      "siteType": "小程序",
+      "advertiserId": "ADV_009",
+      "createTime": "2023-10-22 15:20:00",
+      "image": "https://picsum.photos/seed/109/150/150"
+    },
+    {
+      "id": "110",
+      "name": "产品J会场页",
+      "url": "https://example.com/j-event",
+      "product": "产品J",
+      "siteType": "PC端",
+      "advertiserId": "ADV_010",
+      "createTime": "2023-10-23 16:35:00",
+      "image": "https://picsum.photos/seed/110/150/150"
+    },
+    {
+      "id": "111",
+      "name": "产品K专题页",
+      "url": "https://example.com/k-topic",
+      "product": "产品K",
+      "siteType": "移动端",
+      "advertiserId": "ADV_011",
+      "createTime": "2023-10-24 17:45:00",
+      "image": "https://picsum.photos/seed/111/150/150"
+    },
+    {
+      "id": "112",
+      "name": "产品L引流页",
+      "url": "https://example.com/l-traffic",
+      "product": "产品L",
+      "siteType": "移动端",
+      "advertiserId": "ADV_012",
+      "createTime": "2023-10-25 18:55:00",
+      "image": "https://picsum.photos/seed/112/150/150"
     }
   ],
   "keywordLibraries": [
@@ -759,6 +1019,116 @@
         "好用不贵"
       ],
       "createTime": "2023-09-05 10:00:00"
+    },
+    {
+      "id": "3",
+      "name": "品牌防守词",
+      "product": "产品B",
+      "keywords": [
+        "官方旗舰店",
+        "品牌直营",
+        "授权正品"
+      ],
+      "createTime": "2023-09-06 10:30:00"
+    },
+    {
+      "id": "4",
+      "name": "场景化关键词",
+      "product": "产品C",
+      "keywords": [
+        "通勤必备",
+        "宿舍好物",
+        "周末出行"
+      ],
+      "createTime": "2023-09-07 11:10:00"
+    },
+    {
+      "id": "5",
+      "name": "人群画像词",
+      "product": "产品D",
+      "keywords": [
+        "学生党",
+        "宝妈推荐",
+        "上班族"
+      ],
+      "createTime": "2023-09-08 11:50:00"
+    },
+    {
+      "id": "6",
+      "name": "促销节点词",
+      "product": "产品E",
+      "keywords": [
+        "双11预售",
+        "618狂欢",
+        "年货节"
+      ],
+      "createTime": "2023-09-09 12:20:00"
+    },
+    {
+      "id": "7",
+      "name": "竞品对比词",
+      "product": "产品F",
+      "keywords": [
+        "性价比更高",
+        "同款替代",
+        "口碑对比"
+      ],
+      "createTime": "2023-09-10 13:05:00"
+    },
+    {
+      "id": "8",
+      "name": "高意向转化词",
+      "product": "产品G",
+      "keywords": [
+        "优惠券领取",
+        "立即下单",
+        "今日特惠"
+      ],
+      "createTime": "2023-09-11 13:40:00"
+    },
+    {
+      "id": "9",
+      "name": "内容种草词",
+      "product": "产品H",
+      "keywords": [
+        "真实测评",
+        "开箱推荐",
+        "达人同款"
+      ],
+      "createTime": "2023-09-12 14:30:00"
+    },
+    {
+      "id": "10",
+      "name": "售后保障词",
+      "product": "产品I",
+      "keywords": [
+        "7天无忧退",
+        "极速发货",
+        "运费险"
+      ],
+      "createTime": "2023-09-13 15:10:00"
+    },
+    {
+      "id": "11",
+      "name": "季节趋势词",
+      "product": "产品J",
+      "keywords": [
+        "夏季清凉",
+        "秋冬保暖",
+        "换季必囤"
+      ],
+      "createTime": "2023-09-14 15:55:00"
+    },
+    {
+      "id": "12",
+      "name": "活动会场词",
+      "product": "产品K",
+      "keywords": [
+        "限时秒杀",
+        "会场专享",
+        "整点开抢"
+      ],
+      "createTime": "2023-09-15 16:35:00"
     }
   ],
   "componentLibraries": [
@@ -777,6 +1147,86 @@
       "product": "产品A",
       "advertiserId": "ADV_001",
       "createTime": "2023-08-10 10:00:00"
+    },
+    {
+      "id": "3",
+      "name": "倒计时条",
+      "type": "转化组件",
+      "product": "产品B",
+      "advertiserId": "ADV_002",
+      "createTime": "2023-08-11 10:30:00"
+    },
+    {
+      "id": "4",
+      "name": "优惠券弹窗",
+      "type": "转化组件",
+      "product": "产品C",
+      "advertiserId": "ADV_003",
+      "createTime": "2023-08-12 11:20:00"
+    },
+    {
+      "id": "5",
+      "name": "对比参数表",
+      "type": "展示组件",
+      "product": "产品D",
+      "advertiserId": "ADV_004",
+      "createTime": "2023-08-13 12:15:00"
+    },
+    {
+      "id": "6",
+      "name": "用户评价墙",
+      "type": "展示组件",
+      "product": "产品E",
+      "advertiserId": "ADV_005",
+      "createTime": "2023-08-14 13:05:00"
+    },
+    {
+      "id": "7",
+      "name": "悬浮咨询按钮",
+      "type": "转化组件",
+      "product": "产品F",
+      "advertiserId": "ADV_006",
+      "createTime": "2023-08-15 14:10:00"
+    },
+    {
+      "id": "8",
+      "name": "信息收集表单",
+      "type": "转化组件",
+      "product": "产品G",
+      "advertiserId": "ADV_007",
+      "createTime": "2023-08-16 15:20:00"
+    },
+    {
+      "id": "9",
+      "name": "轮播卖点区",
+      "type": "展示组件",
+      "product": "产品H",
+      "advertiserId": "ADV_008",
+      "createTime": "2023-08-17 16:30:00"
+    },
+    {
+      "id": "10",
+      "name": "分步引导条",
+      "type": "展示组件",
+      "product": "产品I",
+      "advertiserId": "ADV_009",
+      "createTime": "2023-08-18 17:10:00"
+    },
+    {
+      "id": "11",
+      "name": "会员权益面板",
+      "type": "转化组件",
+      "product": "产品J",
+      "advertiserId": "ADV_010",
+      "createTime": "2023-08-19 18:00:00"
+    },
+    {
+      "id": "12",
+      "name": "FAQ折叠区",
+      "type": "展示组件",
+      "product": "产品K",
+      "advertiserId": "ADV_011",
+      "createTime": "2023-08-20 19:00:00"
     }
   ],
   "productLibraries": [
@@ -799,6 +1249,106 @@
       "image": "https://picsum.photos/seed/2/150/150",
       "video": "",
       "createTime": "2023-07-15 10:00:00"
+    },
+    {
+      "id": "3",
+      "name": "轻量便携款C",
+      "libraryName": "夏季上新",
+      "product": "产品C",
+      "advertiserId": "ADV_003",
+      "image": "https://picsum.photos/seed/3/150/150",
+      "video": "",
+      "createTime": "2023-07-16 10:30:00"
+    },
+    {
+      "id": "4",
+      "name": "经典复购款D",
+      "libraryName": "高复购库",
+      "product": "产品D",
+      "advertiserId": "ADV_004",
+      "image": "https://picsum.photos/seed/4/150/150",
+      "video": "",
+      "createTime": "2023-07-17 11:15:00"
+    },
+    {
+      "id": "5",
+      "name": "礼盒装E",
+      "libraryName": "节日礼盒库",
+      "product": "产品E",
+      "advertiserId": "ADV_005",
+      "image": "https://picsum.photos/seed/5/150/150",
+      "video": "",
+      "createTime": "2023-07-18 12:10:00"
+    },
+    {
+      "id": "6",
+      "name": "高端旗舰F",
+      "libraryName": "高客单库",
+      "product": "产品F",
+      "advertiserId": "ADV_006",
+      "image": "https://picsum.photos/seed/6/150/150",
+      "video": "https://www.w3schools.com/html/mov_bbb.mp4",
+      "createTime": "2023-07-19 13:20:00"
+    },
+    {
+      "id": "7",
+      "name": "入门基础款G",
+      "libraryName": "新客引流库",
+      "product": "产品G",
+      "advertiserId": "ADV_007",
+      "image": "https://picsum.photos/seed/7/150/150",
+      "video": "",
+      "createTime": "2023-07-20 14:05:00"
+    },
+    {
+      "id": "8",
+      "name": "家庭组合装H",
+      "libraryName": "家庭场景库",
+      "product": "产品H",
+      "advertiserId": "ADV_008",
+      "image": "https://picsum.photos/seed/8/150/150",
+      "video": "",
+      "createTime": "2023-07-21 15:00:00"
+    },
+    {
+      "id": "9",
+      "name": "直播热卖款I",
+      "libraryName": "直播爆款库",
+      "product": "产品I",
+      "advertiserId": "ADV_009",
+      "image": "https://picsum.photos/seed/9/150/150",
+      "video": "",
+      "createTime": "2023-07-22 15:50:00"
+    },
+    {
+      "id": "10",
+      "name": "联名限定款J",
+      "libraryName": "联名活动库",
+      "product": "产品J",
+      "advertiserId": "ADV_010",
+      "image": "https://picsum.photos/seed/10/150/150",
+      "video": "",
+      "createTime": "2023-07-23 16:40:00"
+    },
+    {
+      "id": "11",
+      "name": "季节限定款K",
+      "libraryName": "换季推荐库",
+      "product": "产品K",
+      "advertiserId": "ADV_011",
+      "image": "https://picsum.photos/seed/11/150/150",
+      "video": "",
+      "createTime": "2023-07-24 17:30:00"
+    },
+    {
+      "id": "12",
+      "name": "口碑回购款L",
+      "libraryName": "老客复购库",
+      "product": "产品L",
+      "advertiserId": "ADV_012",
+      "image": "https://picsum.photos/seed/12/150/150",
+      "video": "",
+      "createTime": "2023-07-25 18:20:00"
     }
   ],
   "textSummaryLibraries": [
@@ -820,6 +1370,106 @@
         "好评如潮，买过都说好"
       ],
       "createTime": "2023-06-10 10:00:00"
+    },
+    {
+      "id": "3",
+      "name": "新品卖点摘要",
+      "product": "产品C",
+      "summaries": [
+        "全新升级工艺，体验更顺滑",
+        "首发福利叠加，性价比拉满"
+      ],
+      "createTime": "2023-06-11 10:30:00"
+    },
+    {
+      "id": "4",
+      "name": "促销活动摘要",
+      "product": "产品D",
+      "summaries": [
+        "限时满减叠券更优惠",
+        "活动库存紧张建议尽早下单"
+      ],
+      "createTime": "2023-06-12 11:20:00"
+    },
+    {
+      "id": "5",
+      "name": "直播讲解摘要",
+      "product": "产品E",
+      "summaries": [
+        "主播实测对比，效果一目了然",
+        "直播间专享赠品同步发放"
+      ],
+      "createTime": "2023-06-13 12:10:00"
+    },
+    {
+      "id": "6",
+      "name": "口碑复购摘要",
+      "product": "产品F",
+      "summaries": [
+        "复购用户占比持续增长",
+        "好评关键词集中在稳定耐用"
+      ],
+      "createTime": "2023-06-14 12:50:00"
+    },
+    {
+      "id": "7",
+      "name": "场景推荐摘要",
+      "product": "产品G",
+      "summaries": [
+        "适合通勤与旅行双场景使用",
+        "轻便体积节省收纳空间"
+      ],
+      "createTime": "2023-06-15 13:40:00"
+    },
+    {
+      "id": "8",
+      "name": "节日礼赠摘要",
+      "product": "产品H",
+      "summaries": [
+        "礼盒包装精致，送礼更体面",
+        "多规格可选满足不同预算"
+      ],
+      "createTime": "2023-06-16 14:25:00"
+    },
+    {
+      "id": "9",
+      "name": "售后保障摘要",
+      "product": "产品I",
+      "summaries": [
+        "支持7天无理由退换",
+        "客服在线响应时效快"
+      ],
+      "createTime": "2023-06-17 15:15:00"
+    },
+    {
+      "id": "10",
+      "name": "人群洞察摘要",
+      "product": "产品J",
+      "summaries": [
+        "年轻用户偏好高颜值设计",
+        "家庭用户更关注耐用与安全"
+      ],
+      "createTime": "2023-06-18 16:00:00"
+    },
+    {
+      "id": "11",
+      "name": "竞品对比摘要",
+      "product": "产品K",
+      "summaries": [
+        "核心功能参数领先竞品",
+        "同价位段附加服务更丰富"
+      ],
+      "createTime": "2023-06-19 16:40:00"
+    },
+    {
+      "id": "12",
+      "name": "会场冲量摘要",
+      "product": "产品L",
+      "summaries": [
+        "会场流量高峰期点击明显提升",
+        "搭配优惠机制转化更稳定"
+      ],
+      "createTime": "2023-06-20 17:30:00"
     }
   ],
   "industryProducts": [

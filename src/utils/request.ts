@@ -19,6 +19,16 @@ type PersonnelDictionary = {
 
 const LOCAL_DB_KEY = 'smart-marketing-local-db'
 let dbCache: DbStore | null = null
+const PLATFORM1_COLLECTIONS = [
+  'targetingPackages',
+  'titleLibraries',
+  'landingPages',
+  'keywordLibraries',
+  'componentLibraries',
+  'productLibraries',
+  'textSummaryLibraries',
+] as const
+const PLATFORM1_MIN_ITEMS = 11
 
 const deepClone = <T>(value: T): T => {
   if (typeof structuredClone === 'function') {
@@ -126,6 +136,20 @@ const hydrateDbForMaterialFilters = (db: DbStore) => {
   return changed
 }
 
+const hydrateDbForPlatform1 = (db: DbStore) => {
+  let changed = false
+  const seed = seedDb as DbStore
+  PLATFORM1_COLLECTIONS.forEach((collectionName) => {
+    const current = getCollection(db, collectionName) ?? []
+    const seedCollection = getCollection(seed, collectionName) ?? []
+    if (current.length < PLATFORM1_MIN_ITEMS && seedCollection.length >= PLATFORM1_MIN_ITEMS) {
+      db[collectionName] = deepClone(seedCollection) as unknown as DbCollection
+      changed = true
+    }
+  })
+  return changed
+}
+
 const normalizeUrl = (url: string) => {
   return url.split('?')[0]?.split('#')[0]?.replace(/^\/+/, '') ?? ''
 }
@@ -164,13 +188,16 @@ const ensureDb = async (): Promise<DbStore> => {
   const local = readLocalDb()
   if (local) {
     dbCache = local
-    if (hydrateDbForMaterialFilters(dbCache)) {
+    const changedByMaterialFilters = hydrateDbForMaterialFilters(dbCache)
+    const changedByPlatform1 = hydrateDbForPlatform1(dbCache)
+    if (changedByMaterialFilters || changedByPlatform1) {
       persistLocalDb(dbCache)
     }
     return dbCache
   }
   dbCache = deepClone(seedDb as DbStore)
   hydrateDbForMaterialFilters(dbCache)
+  hydrateDbForPlatform1(dbCache)
   persistLocalDb(dbCache)
   return dbCache
 }
