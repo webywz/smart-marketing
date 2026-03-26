@@ -190,7 +190,25 @@
         </el-dropdown>
       </div>
       <div class="action-right">
-        <!-- Optional: Custom Column Popover could go here -->
+        <el-popover placement="bottom-end" :width="360" trigger="click">
+          <template #reference>
+            <el-button>自定义列</el-button>
+          </template>
+          <el-space style="margin-bottom: 12px">
+            <el-button size="small" @click="selectAllTableColumns">全选</el-button>
+            <el-button size="small" @click="resetTableColumns">恢复默认</el-button>
+          </el-space>
+          <el-checkbox-group v-model="selectedTableColumnKeys" class="table-column-group">
+            <el-checkbox
+              v-for="column in tableColumnOptions"
+              :key="column.key"
+              :value="column.key"
+              :disabled="column.fixed"
+            >
+              {{ column.label }}
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-popover>
       </div>
     </div>
 
@@ -205,7 +223,7 @@
         height="100%"
       >
         <el-table-column type="selection" width="50" />
-        <el-table-column label="预览" width="80">
+        <el-table-column v-if="isColumnVisible('preview')" label="预览" width="80">
           <template #default="{ row }">
             <el-image
               :src="row.thumbnail"
@@ -215,7 +233,13 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="素材名称" min-width="180" show-overflow-tooltip>
+        <el-table-column
+          v-if="isColumnVisible('name')"
+          prop="name"
+          label="素材名称"
+          min-width="180"
+          show-overflow-tooltip
+        >
           <template #default="{ row }">
             <div class="name-col">
               {{ row.name }}
@@ -225,14 +249,19 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="80">
+        <el-table-column v-if="isColumnVisible('status')" prop="status" label="状态" width="80">
           <template #default="{ row }">
             <el-tag :type="row.status === 'enabled' ? 'success' : 'info'" size="small">
               {{ row.status === 'enabled' ? '启用' : '禁用' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="auditStatus" label="审核状态" width="100">
+        <el-table-column
+          v-if="isColumnVisible('auditStatus')"
+          prop="auditStatus"
+          label="审核状态"
+          width="100"
+        >
           <template #default="{ row }">
             <el-tag :type="getAuditTagType(row.auditStatus)" size="small">
               {{ getAuditLabel(row.auditStatus) }}
@@ -241,14 +270,43 @@
         </el-table-column>
 
         <!-- Sorting enabled columns -->
-        <el-table-column prop="createTime" label="上传时间" sortable="custom" width="160" />
-        <el-table-column prop="usageCount" label="总使用次数" sortable="custom" width="120" />
-        <el-table-column prop="platform1Usage" label="平台1使用" sortable="custom" width="120" />
-        <el-table-column prop="approvalRate" label="卡审率 (%)" sortable="custom" width="120">
+        <el-table-column
+          v-if="isColumnVisible('createTime')"
+          prop="createTime"
+          label="上传时间"
+          sortable="custom"
+          width="160"
+        />
+        <el-table-column
+          v-if="isColumnVisible('usageCount')"
+          prop="usageCount"
+          label="总使用次数"
+          sortable="custom"
+          width="120"
+        />
+        <el-table-column
+          v-if="isColumnVisible('platform1Usage')"
+          prop="platform1Usage"
+          label="平台1使用"
+          sortable="custom"
+          width="120"
+        />
+        <el-table-column
+          v-if="isColumnVisible('approvalRate')"
+          prop="approvalRate"
+          label="卡审率 (%)"
+          sortable="custom"
+          width="120"
+        >
           <template #default="{ row }">{{ row.approvalRate }}%</template>
         </el-table-column>
 
-        <el-table-column label="标签" min-width="150" show-overflow-tooltip>
+        <el-table-column
+          v-if="isColumnVisible('tags')"
+          label="标签"
+          min-width="150"
+          show-overflow-tooltip
+        >
           <template #default="{ row }">
             <el-space wrap>
               <el-tag v-for="tag in getMergedTags(row)" :key="tag" size="small">{{ tag }}</el-tag>
@@ -532,7 +590,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowDown, StarFilled, UploadFilled } from '@element-plus/icons-vue'
 import { match } from 'ts-pattern'
@@ -635,6 +693,23 @@ const defaultExportFieldKeys = [
   'creator',
 ]
 const selectedExportFieldKeys = ref<string[]>([...defaultExportFieldKeys])
+const tableColumnStorageKey = 'material-table-column-keys'
+const tableColumnOptions = [
+  { key: 'preview', label: '预览', fixed: false },
+  { key: 'name', label: '素材名称', fixed: true },
+  { key: 'status', label: '状态', fixed: false },
+  { key: 'auditStatus', label: '审核状态', fixed: false },
+  { key: 'createTime', label: '上传时间', fixed: false },
+  { key: 'usageCount', label: '总使用次数', fixed: false },
+  { key: 'platform1Usage', label: '平台1使用', fixed: false },
+  { key: 'approvalRate', label: '卡审率 (%)', fixed: false },
+  { key: 'tags', label: '标签', fixed: false },
+] as const
+const fixedTableColumnKeys = tableColumnOptions
+  .filter((column) => column.fixed)
+  .map((column) => column.key)
+const defaultTableColumnKeys = tableColumnOptions.map((column) => column.key)
+const selectedTableColumnKeys = ref<string[]>([...defaultTableColumnKeys])
 
 // Pagination
 const currentPage = ref(1)
@@ -768,6 +843,7 @@ const fetchMaterials = async () => {
 }
 
 onMounted(() => {
+  loadTableColumnSettings()
   fetchMaterials()
 })
 
@@ -912,6 +988,47 @@ const selectAllExportFields = () => {
 const resetExportFields = () => {
   selectedExportFieldKeys.value = [...defaultExportFieldKeys]
 }
+
+const isColumnVisible = (key: string) => selectedTableColumnKeys.value.includes(key)
+
+const selectAllTableColumns = () => {
+  selectedTableColumnKeys.value = [...defaultTableColumnKeys]
+}
+
+const resetTableColumns = () => {
+  selectedTableColumnKeys.value = [...defaultTableColumnKeys]
+}
+
+const loadTableColumnSettings = () => {
+  const raw = localStorage.getItem(tableColumnStorageKey)
+  if (!raw) return
+  try {
+    const savedKeys = JSON.parse(raw) as string[]
+    if (!Array.isArray(savedKeys)) return
+    const availableKeys = new Set(defaultTableColumnKeys)
+    const nextKeys = savedKeys.filter((key) => availableKeys.has(key))
+    if (nextKeys.length > 0) {
+      selectedTableColumnKeys.value = Array.from(new Set([...fixedTableColumnKeys, ...nextKeys]))
+    }
+  } catch {}
+}
+
+watch(
+  selectedTableColumnKeys,
+  (keys) => {
+    if (keys.length === 0) {
+      selectedTableColumnKeys.value = ['name']
+      return
+    }
+    const normalizedKeys = Array.from(new Set([...fixedTableColumnKeys, ...keys]))
+    if (normalizedKeys.length !== keys.length) {
+      selectedTableColumnKeys.value = normalizedKeys
+      return
+    }
+    localStorage.setItem(tableColumnStorageKey, JSON.stringify(normalizedKeys))
+  },
+  { deep: true },
+)
 
 const handleExport = () => {
   if (filteredList.value.length === 0) {
@@ -1213,6 +1330,13 @@ const escapeForHtml = (value: string | number) => {
   }
 
   .export-field-group {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 10px;
+    column-gap: 8px;
+  }
+
+  .table-column-group {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     row-gap: 10px;
