@@ -124,8 +124,9 @@ const loadFolderList = async () => {
     const response = await request.get('/folders')
     const folders = (response as { id: string; name: string }[]) || []
     folderList.value = folders
-    if (!selectedFolderId.value && folders.length > 0) {
-      selectedFolderId.value = folders[0].id
+    const firstFolder = folders[0]
+    if (!selectedFolderId.value && firstFolder) {
+      selectedFolderId.value = firstFolder.id
     }
   } catch {
     ElMessage.error('获取素材目录失败')

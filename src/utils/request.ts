@@ -251,12 +251,12 @@ const service = {
       return item as T
     }),
 
-  post: <T = unknown>(url: string, data: DbRecord) =>
+  post: <T = unknown, D extends object = DbRecord>(url: string, data: D) =>
     runRequest<T>((db) => {
       const { collection } = parseRoute(url)
       if (!collection) throw new Error('请求路径无效')
       const list = ensureCollection(db, collection)
-      const payload = { ...data }
+      const payload: DbRecord = { ...(data as DbRecord) }
       if (payload.id === undefined || payload.id === null || payload.id === '') {
         payload.id = String(Date.now())
       }
@@ -265,14 +265,15 @@ const service = {
       return payload as T
     }),
 
-  put: <T = unknown>(url: string, data: DbRecord) =>
+  put: <T = unknown, D extends object = DbRecord>(url: string, data: D) =>
     runRequest<T>((db) => {
       const { collection, id } = parseRoute(url)
       if (!collection) throw new Error('请求路径无效')
       const list = ensureCollection(db, collection)
-      const targetId = id ?? String(data.id ?? '')
+      const source: DbRecord = data as DbRecord
+      const targetId = id ?? String(source.id ?? '')
       if (!targetId) throw new Error('缺少数据 ID')
-      const payload = { ...data, id: targetId }
+      const payload: DbRecord = { ...source, id: targetId }
       const index = list.findIndex((entry) => String(entry.id) === String(targetId))
       if (index >= 0) {
         list[index] = payload
@@ -283,7 +284,7 @@ const service = {
       return payload as T
     }),
 
-  patch: <T = unknown>(url: string, data: DbRecord) =>
+  patch: <T = unknown, D extends object = DbRecord>(url: string, data: D) =>
     runRequest<T>((db) => {
       const { collection, id } = parseRoute(url)
       if (!collection || !id) throw new Error('请求路径无效')
@@ -291,7 +292,7 @@ const service = {
       const index = list.findIndex((entry) => String(entry.id) === String(id))
       if (index < 0) throw new Error('数据不存在')
       const current = list[index] ?? {}
-      const updated = { ...current, ...data, id }
+      const updated: DbRecord = { ...current, ...(data as DbRecord), id }
       list[index] = updated
       persistLocalDb(db)
       return updated as T
