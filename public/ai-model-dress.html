@@ -50,6 +50,7 @@
           <div class="mt-6 flex flex-wrap gap-3">
             <button id="submitTaskBtn" class="cursor-pointer rounded-xl bg-slate-900 px-4 py-2 font-medium text-white transition-colors duration-200 hover:bg-black">创建换装任务</button>
             <button id="queryTaskBtn" class="cursor-pointer rounded-xl border border-slate-300 bg-white px-4 py-2 font-medium transition-colors duration-200 hover:bg-slate-50">查询任务状态</button>
+            <button id="stopPollBtn" class="cursor-pointer rounded-xl border border-rose-300 bg-white px-4 py-2 font-medium text-rose-600 transition-colors duration-200 hover:bg-rose-50">停止自动查询</button>
           </div>
         </section>
 
@@ -64,6 +65,12 @@
           </div>
           <div class="mt-4 rounded-xl bg-slate-900 p-3 text-xs text-green-300">
             <pre id="resultView" class="max-h-80 overflow-auto whitespace-pre-wrap break-all">等待操作...</pre>
+          </div>
+          <div class="mt-4 rounded-xl border border-slate-200 p-3">
+            <h3 class="text-sm font-semibold">生成视频预览</h3>
+            <video id="videoPreview" class="mt-2 hidden w-full rounded-lg bg-black" controls playsinline></video>
+            <a id="videoDownload" class="mt-2 hidden text-sm text-blue-600 hover:text-blue-700" target="_blank" rel="noopener noreferrer">打开视频链接</a>
+            <p id="videoTip" class="mt-2 text-xs text-slate-500">任务完成后会自动展示视频。</p>
           </div>
         </section>
       </div>
@@ -94,7 +101,8 @@
 
       const state = {
         images: [],
-        videos: []
+        videos: [],
+        polling: false
       }
 
       const dom = {
@@ -106,9 +114,13 @@
         taskId: document.getElementById('taskId'),
         payloadView: document.getElementById('payloadView'),
         resultView: document.getElementById('resultView'),
+        videoPreview: document.getElementById('videoPreview'),
+        videoDownload: document.getElementById('videoDownload'),
+        videoTip: document.getElementById('videoTip'),
         addImageBtn: document.getElementById('addImageBtn'),
         addVideoBtn: document.getElementById('addVideoBtn'),
         submitTaskBtn: document.getElementById('submitTaskBtn'),
+        stopPollBtn: document.getElementById('stopPollBtn'),
         queryTaskBtn: document.getElementById('queryTaskBtn'),
         assetRowTpl: document.getElementById('assetRowTpl')
       }
@@ -248,6 +260,7 @@
       function getAuthHeader() {
         const token = APP_CONFIG.token.trim()
         if (!token) throw new Error('请在APP_CONFIG.token中写死Token')
+        if (/^Bearer\s+/i.test(token)) return token
         return `Bearer ${token}`
       }
 
@@ -283,6 +296,84 @@
         return resp?.id || resp?.task_id || resp?.data?.id || resp?.data?.task_id || ''
       }
 
+      function findVideoUrls(value, bucket = []) {
+        if (typeof value === 'string') {
+          if (/^https?:\/\/.+\.(mp4|webm|mov|m3u8)(\?.*)?$/i.test(value)) {
+            bucket.push(value)
+          }
+          return bucket
+        }
+        if (Array.isArray(value)) {
+          value.forEach((item) => findVideoUrls(item, bucket))
+          return bucket
+        }
+        if (value && typeof value === 'object') {
+          Object.values(value).forEach((item) => findVideoUrls(item, bucket))
+        }
+        return bucket
+      }
+
+      function renderVideoResult(videoUrl) {
+        if (!videoUrl) return
+        dom.videoPreview.src = videoUrl
+        dom.videoPreview.classList.remove('hidden')
+        dom.videoDownload.href = videoUrl
+        dom.videoDownload.textContent = videoUrl
+        dom.videoDownload.classList.remove('hidden')
+        dom.videoTip.textContent = '已获取最终视频，支持在线预览。'
+      }
+
+      function getTaskStatus(resp) {
+        return resp?.status || resp?.data?.status || ''
+      }
+
+      function sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms))
+      }
+
+      function setPollingUi(running) {
+        dom.submitTaskBtn.disabled = running
+        dom.queryTaskBtn.disabled = running
+        dom.stopPollBtn.disabled = !running
+      }
+
+      async function queryTaskById(id) {
+        const baseUrl = normalizeBaseUrl(APP_CONFIG.baseUrl)
+        const url = `${baseUrl}/contents/generations/tasks/${id}`
+        return requestJson(url, {
+          method: 'GET',
+          headers: {
+            Authorization: getAuthHeader()
+          }
+        })
+      }
+
+      async function startPollingTask(id) {
+        state.polling = true
+        setPollingUi(true)
+        dom.videoPreview.classList.add('hidden')
+        dom.videoDownload.classList.add('hidden')
+        dom.videoTip.textContent = '自动查询中，请稍候...'
+        while (state.polling) {
+          const data = await queryTaskById(id)
+          const status = getTaskStatus(data)
+          dom.resultView.textContent = `任务查询成功\n${JSON.stringify(data, null, 2)}`
+          const videoUrls = findVideoUrls(data)
+          if (videoUrls.length) {
+            renderVideoResult(videoUrls[0])
+          }
+          if (status === 'succeeded' || status === 'success' || status === 'failed' || status === 'canceled') {
+            break
+          }
+          await sleep(3000)
+        }
+        state.polling = false
+        setPollingUi(false)
+        if (dom.videoPreview.classList.contains('hidden')) {
+          dom.videoTip.textContent = '任务已结束，但未在返回中识别到视频链接。'
+        }
+      }
+
       async function handleSubmitTask() {
         try {
           const payload = await buildPayload()
@@ -300,7 +391,12 @@
           const taskId = extractTaskId(data)
           if (taskId) dom.taskId.value = taskId
           dom.resultView.textContent = `任务创建成功\n${JSON.stringify(data, null, 2)}`
+          if (taskId) {
+            await startPollingTask(taskId)
+          }
         } catch (err) {
+          state.polling = false
+          setPollingUi(false)
           dom.resultView.textContent = `任务创建失败\n${err.message}`
         }
       }
@@ -309,24 +405,27 @@
         try {
           const id = dom.taskId.value.trim()
           if (!id) throw new Error('请先填写任务ID')
-          const baseUrl = normalizeBaseUrl(APP_CONFIG.baseUrl)
-          const url = `${baseUrl}/contents/generations/tasks/${id}`
-          const data = await requestJson(url, {
-            method: 'GET',
-            headers: {
-              Authorization: getAuthHeader()
-            }
-          })
-          dom.resultView.textContent = `任务查询成功\n${JSON.stringify(data, null, 2)}`
+          await startPollingTask(id)
         } catch (err) {
+          state.polling = false
+          setPollingUi(false)
           dom.resultView.textContent = `任务查询失败\n${err.message}`
         }
+      }
+
+      function handleStopPolling() {
+        state.polling = false
+        setPollingUi(false)
+        dom.videoTip.textContent = '已手动停止自动查询。'
       }
 
       dom.addImageBtn.addEventListener('click', () => addAsset('images'))
       dom.addVideoBtn.addEventListener('click', () => addAsset('videos'))
       dom.submitTaskBtn.addEventListener('click', handleSubmitTask)
       dom.queryTaskBtn.addEventListener('click', handleQueryTask)
+      dom.stopPollBtn.addEventListener('click', handleStopPolling)
+
+      setPollingUi(false)
 
       addAsset('images')
       addAsset('videos')
