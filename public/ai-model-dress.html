@@ -49,7 +49,10 @@
 
           <div class="mt-6 flex flex-wrap gap-3">
             <button id="submitTaskBtn" class="cursor-pointer rounded-xl bg-slate-900 px-4 py-2 font-medium text-white transition-colors duration-200 hover:bg-black">创建换装任务</button>
-            <button id="queryTaskBtn" class="cursor-pointer rounded-xl border border-slate-300 bg-white px-4 py-2 font-medium transition-colors duration-200 hover:bg-slate-50">查询任务状态</button>
+            <button id="queryTaskBtn" class="cursor-pointer rounded-xl border border-slate-300 bg-white px-4 py-2 font-medium transition-colors duration-200 hover:bg-slate-50">
+              查询任务状态
+              <span id="queryLoadingIcon" class="ml-2 hidden inline-block h-3 w-3 animate-spin rounded-full border-2 border-slate-400 border-t-transparent"></span>
+            </button>
             <button id="stopPollBtn" class="cursor-pointer rounded-xl border border-rose-300 bg-white px-4 py-2 font-medium text-rose-600 transition-colors duration-200 hover:bg-rose-50">停止自动查询</button>
           </div>
         </section>
@@ -69,7 +72,6 @@
           <div class="mt-4 rounded-xl border border-slate-200 p-3">
             <h3 class="text-sm font-semibold">生成视频预览</h3>
             <video id="videoPreview" class="mt-2 hidden w-full rounded-lg bg-black" controls playsinline></video>
-            <a id="videoDownload" class="mt-2 hidden text-sm text-blue-600 hover:text-blue-700" target="_blank" rel="noopener noreferrer">打开视频链接</a>
             <p id="videoTip" class="mt-2 text-xs text-slate-500">任务完成后会自动展示视频。</p>
           </div>
         </section>
@@ -96,7 +98,8 @@
         baseUrl: 'http://zlhub.xiaowaiyou.cn/zhonglian/api/v1/proxy/ark',
         uploadUrl: 'https://zlhub.xiaowaiyou.cn/zhonglian/api/v1/storage/upload',
         model: 'doubao-seedance-2.0',
-        token: 'Bearer sk-qaTo2rCaRLCXGZ6U2tCrnwSK92UKXGQk4gFxozNEdADA4kzl'
+        token: 'Bearer sk-qaTo2rCaRLCXGZ6U2tCrnwSK92UKXGQk4gFxozNEdADA4kzl',
+        defaultImageUrl: 'Asset://Asset-20260327143152-w7v6t'
       }
 
       const state = {
@@ -115,13 +118,13 @@
         payloadView: document.getElementById('payloadView'),
         resultView: document.getElementById('resultView'),
         videoPreview: document.getElementById('videoPreview'),
-        videoDownload: document.getElementById('videoDownload'),
         videoTip: document.getElementById('videoTip'),
         addImageBtn: document.getElementById('addImageBtn'),
         addVideoBtn: document.getElementById('addVideoBtn'),
         submitTaskBtn: document.getElementById('submitTaskBtn'),
         stopPollBtn: document.getElementById('stopPollBtn'),
         queryTaskBtn: document.getElementById('queryTaskBtn'),
+        queryLoadingIcon: document.getElementById('queryLoadingIcon'),
         assetRowTpl: document.getElementById('assetRowTpl')
       }
 
@@ -130,7 +133,7 @@
           id: `${kind}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
           kind,
           sourceType: 'url',
-          url: '',
+          url: kind === 'images' ? APP_CONFIG.defaultImageUrl : '',
           file: null
         }
       }
@@ -317,9 +320,6 @@
         if (!videoUrl) return
         dom.videoPreview.src = videoUrl
         dom.videoPreview.classList.remove('hidden')
-        dom.videoDownload.href = videoUrl
-        dom.videoDownload.textContent = videoUrl
-        dom.videoDownload.classList.remove('hidden')
         dom.videoTip.textContent = '已获取最终视频，支持在线预览。'
       }
 
@@ -335,6 +335,17 @@
         dom.submitTaskBtn.disabled = running
         dom.queryTaskBtn.disabled = running
         dom.stopPollBtn.disabled = !running
+        dom.addImageBtn.disabled = running
+        dom.addVideoBtn.disabled = running
+        dom.prompt.disabled = running
+        dom.ratio.disabled = running
+        dom.duration.disabled = running
+        dom.taskId.disabled = running
+        const lockSelectors = '#imageList select, #imageList input, #imageList button, #videoList select, #videoList input, #videoList button'
+        document.querySelectorAll(lockSelectors).forEach((node) => {
+          node.disabled = running
+        })
+        dom.queryLoadingIcon.classList.toggle('hidden', !running)
       }
 
       async function queryTaskById(id) {
@@ -352,7 +363,6 @@
         state.polling = true
         setPollingUi(true)
         dom.videoPreview.classList.add('hidden')
-        dom.videoDownload.classList.add('hidden')
         dom.videoTip.textContent = '自动查询中，请稍候...'
         while (state.polling) {
           const data = await queryTaskById(id)
