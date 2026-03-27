@@ -227,14 +227,25 @@
             <el-button size="small" @click="resetTableColumns">恢复默认</el-button>
           </el-space>
           <el-checkbox-group v-model="selectedTableColumnKeys" class="table-column-group">
-            <el-checkbox
-              v-for="column in tableColumnOptions"
+            <div
+              v-for="column in orderedTableColumns"
               :key="column.key"
-              :value="column.key"
-              :disabled="column.fixed"
+              class="table-column-item"
+              :class="{
+                dragging: draggingColumnKey === column.key,
+                'drag-over': dragOverColumnKey === column.key,
+              }"
+              draggable="true"
+              @dragstart="handleTableColumnDragStart(column.key)"
+              @dragover.prevent="handleTableColumnDragOver(column.key)"
+              @drop.prevent="handleTableColumnDrop(column.key)"
+              @dragend="handleTableColumnDragEnd"
             >
-              {{ column.label }}
-            </el-checkbox>
+              <el-icon class="drag-icon"><Rank /></el-icon>
+              <el-checkbox :value="column.key" :disabled="column.fixed">
+                {{ column.fixed ? `${column.label}（固定）` : column.label }}
+              </el-checkbox>
+            </div>
           </el-checkbox-group>
         </el-popover>
       </div>
@@ -251,103 +262,102 @@
         height="100%"
       >
         <el-table-column type="selection" width="50" />
-        <el-table-column v-if="isColumnVisible('preview')" label="预览" width="80">
-          <template #default="{ row }">
-            <el-image
-              :src="row.thumbnail"
-              :preview-src-list="[row.url]"
-              fit="cover"
-              class="table-thumb"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column
-          v-if="isColumnVisible('name')"
-          prop="name"
-          label="素材名称"
-          min-width="180"
-          show-overflow-tooltip
-        >
-          <template #default="{ row }">
-            <div class="name-col">
-              {{ row.name }}
-              <el-icon v-if="row.isFavorite" color="#e6a23c" class="fav-icon"
-                ><StarFilled
-              /></el-icon>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column v-if="isColumnVisible('status')" prop="status" label="状态" width="80">
-          <template #default="{ row }">
-            <el-tag :type="row.status === 'enabled' ? 'success' : 'info'" size="small">
-              {{ row.status === 'enabled' ? '启用' : '禁用' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column
-          v-if="isColumnVisible('auditStatus')"
-          prop="auditStatus"
-          label="审核状态"
-          width="100"
-        >
-          <template #default="{ row }">
-            <el-tag :type="getAuditTagType(row.auditStatus)" size="small">
-              {{ getAuditLabel(row.auditStatus) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-
-        <!-- Sorting enabled columns -->
-        <el-table-column
-          v-if="isColumnVisible('createTime')"
-          prop="createTime"
-          label="上传时间"
-          sortable="custom"
-          width="160"
-        />
-        <el-table-column
-          v-if="isColumnVisible('usageCount')"
-          prop="usageCount"
-          label="总使用次数"
-          sortable="custom"
-          width="120"
-        />
-        <el-table-column
-          v-if="isColumnVisible('platform1Usage')"
-          prop="platform1Usage"
-          label="平台1使用"
-          sortable="custom"
-          width="120"
-        />
-        <el-table-column
-          v-if="isColumnVisible('platform2Usage')"
-          prop="platform2Usage"
-          label="平台2使用"
-          sortable="custom"
-          width="120"
-        />
-        <el-table-column
-          v-if="isColumnVisible('approvalRate')"
-          prop="approvalRate"
-          label="卡审率 (%)"
-          sortable="custom"
-          width="120"
-        >
-          <template #default="{ row }">{{ row.approvalRate }}%</template>
-        </el-table-column>
-
-        <el-table-column
-          v-if="isColumnVisible('tags')"
-          label="标签"
-          min-width="150"
-          show-overflow-tooltip
-        >
-          <template #default="{ row }">
-            <el-space wrap>
-              <el-tag v-for="tag in getMergedTags(row)" :key="tag" size="small">{{ tag }}</el-tag>
-            </el-space>
-          </template>
-        </el-table-column>
+        <template v-for="column in orderedVisibleTableColumns" :key="column.key">
+          <el-table-column v-if="column.key === 'preview'" label="预览" width="80">
+            <template #default="{ row }">
+              <el-image
+                :src="row.thumbnail"
+                :preview-src-list="[row.url]"
+                fit="cover"
+                class="table-thumb"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column
+            v-else-if="column.key === 'name'"
+            prop="name"
+            label="素材名称"
+            min-width="180"
+            show-overflow-tooltip
+          >
+            <template #default="{ row }">
+              <div class="name-col">
+                {{ row.name }}
+                <el-icon v-if="row.isFavorite" color="#e6a23c" class="fav-icon"
+                  ><StarFilled
+                /></el-icon>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column v-else-if="column.key === 'status'" prop="status" label="状态" width="80">
+            <template #default="{ row }">
+              <el-tag :type="row.status === 'enabled' ? 'success' : 'info'" size="small">
+                {{ row.status === 'enabled' ? '启用' : '禁用' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column
+            v-else-if="column.key === 'auditStatus'"
+            prop="auditStatus"
+            label="审核状态"
+            width="100"
+          >
+            <template #default="{ row }">
+              <el-tag :type="getAuditTagType(row.auditStatus)" size="small">
+                {{ getAuditLabel(row.auditStatus) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column
+            v-else-if="column.key === 'createTime'"
+            prop="createTime"
+            label="上传时间"
+            sortable="custom"
+            width="160"
+          />
+          <el-table-column
+            v-else-if="column.key === 'usageCount'"
+            prop="usageCount"
+            label="总使用次数"
+            sortable="custom"
+            width="120"
+          />
+          <el-table-column
+            v-else-if="column.key === 'platform1Usage'"
+            prop="platform1Usage"
+            label="平台1使用"
+            sortable="custom"
+            width="120"
+          />
+          <el-table-column
+            v-else-if="column.key === 'platform2Usage'"
+            prop="platform2Usage"
+            label="平台2使用"
+            sortable="custom"
+            width="120"
+          />
+          <el-table-column
+            v-else-if="column.key === 'approvalRate'"
+            prop="approvalRate"
+            label="卡审率 (%)"
+            sortable="custom"
+            width="120"
+          >
+            <template #default="{ row }">{{ row.approvalRate }}%</template>
+          </el-table-column>
+          <el-table-column
+            v-else-if="column.key === 'tags'"
+            label="标签"
+            min-width="150"
+            show-overflow-tooltip
+          >
+            <template #default="{ row }">
+              <el-space wrap>
+                <el-tag v-for="tag in getMergedTags(row)" :key="tag" size="small">{{ tag }}</el-tag>
+              </el-space>
+            </template>
+          </el-table-column>
+        </template>
 
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
@@ -659,7 +669,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowDown, StarFilled, UploadFilled } from '@element-plus/icons-vue'
+import { ArrowDown, Rank, StarFilled, UploadFilled } from '@element-plus/icons-vue'
 import { match } from 'ts-pattern'
 import { type Material } from '@/mock/materialData'
 import type { UploadInstance, UploadUserFile } from 'element-plus'
@@ -722,7 +732,7 @@ const personnelList = ref<{
   scriptwriters: [],
   introMakers: [],
 })
-const platformTagList = ['高光影', '明亮', '年轻化', '动感', '促销', '教育'] // Could also be from API
+const platformTagList = ref<string[]>([])
 const exportFieldOptions: Array<{
   key: string
   label: string
@@ -785,6 +795,9 @@ const fixedTableColumnKeys = tableColumnOptions
   .map((column) => column.key)
 const defaultTableColumnKeys = tableColumnOptions.map((column) => column.key)
 const selectedTableColumnKeys = ref<string[]>([...defaultTableColumnKeys])
+const tableColumnOrder = ref<string[]>([...defaultTableColumnKeys])
+const draggingColumnKey = ref('')
+const dragOverColumnKey = ref('')
 
 // Pagination
 const currentPage = ref(1)
@@ -897,15 +910,25 @@ const paginatedList = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
   return filteredList.value.slice(start, start + pageSize.value)
 })
+const tableColumnMap = new Map(tableColumnOptions.map((column) => [column.key, column] as const))
+const orderedTableColumns = computed(() =>
+  tableColumnOrder.value
+    .map((key) => tableColumnMap.get(key))
+    .filter((column): column is (typeof tableColumnOptions)[number] => Boolean(column)),
+)
+const orderedVisibleTableColumns = computed(() =>
+  orderedTableColumns.value.filter((column) => isColumnVisible(column.key)),
+)
 
 // --- Lifecycle ---
 const fetchMaterials = async () => {
   loading.value = true
   try {
-    const [matRes, foldersRes, tagsRes, personnelRes] = await Promise.all([
+    const [matRes, foldersRes, tagsRes, platformTagsRes, personnelRes] = await Promise.all([
       request.get('/materials'),
       request.get('/folders'),
       request.get('/tags'),
+      request.get('/platformTags'),
       request.get('/personnel'),
     ])
 
@@ -917,6 +940,11 @@ const fetchMaterials = async () => {
 
     folderList.value = (foldersRes as unknown as { id: string; name: string }[]) || []
     tagList.value = (tagsRes as unknown as { id: string; name: string }[]) || []
+    platformTagList.value = Array.isArray(platformTagsRes)
+      ? (platformTagsRes as Array<{ name?: string }>)
+          .map((item) => String(item?.name || '').trim())
+          .filter(Boolean)
+      : []
     personnelList.value = (personnelRes as unknown as any) || { designers: [], creators: [] }
   } catch (e) {
     ElMessage.error('获取数据失败')
@@ -1097,22 +1125,74 @@ const selectAllTableColumns = () => {
 
 const resetTableColumns = () => {
   selectedTableColumnKeys.value = [...defaultTableColumnKeys]
+  tableColumnOrder.value = [...defaultTableColumnKeys]
+}
+
+const normalizeTableColumnOrder = (keys: string[]) => {
+  const availableKeys = new Set<string>(defaultTableColumnKeys)
+  const deduped = Array.from(new Set(keys.filter((key) => availableKeys.has(key))))
+  defaultTableColumnKeys.forEach((key) => {
+    if (!deduped.includes(key)) deduped.push(key)
+  })
+  return deduped
+}
+
+const moveTableColumn = (dragKey: string, dropKey: string) => {
+  if (!dragKey || !dropKey || dragKey === dropKey) return
+  const nextOrder = [...tableColumnOrder.value]
+  const fromIndex = nextOrder.indexOf(dragKey)
+  const toIndex = nextOrder.indexOf(dropKey)
+  if (fromIndex < 0 || toIndex < 0) return
+  nextOrder.splice(fromIndex, 1)
+  nextOrder.splice(toIndex, 0, dragKey)
+  tableColumnOrder.value = nextOrder
+}
+
+const handleTableColumnDragStart = (key: string) => {
+  draggingColumnKey.value = key
+}
+
+const handleTableColumnDragOver = (key: string) => {
+  if (!draggingColumnKey.value || draggingColumnKey.value === key) return
+  dragOverColumnKey.value = key
+}
+
+const handleTableColumnDrop = (key: string) => {
+  moveTableColumn(draggingColumnKey.value, key)
+  draggingColumnKey.value = ''
+  dragOverColumnKey.value = ''
+}
+
+const handleTableColumnDragEnd = () => {
+  draggingColumnKey.value = ''
+  dragOverColumnKey.value = ''
 }
 
 const loadTableColumnSettings = () => {
   const raw = localStorage.getItem(tableColumnStorageKey)
   if (!raw) return
   try {
-    const savedKeys = JSON.parse(raw) as string[]
-    if (!Array.isArray(savedKeys)) return
+    const parsed = JSON.parse(raw) as
+      | string[]
+      | {
+          selectedKeys?: string[]
+          order?: string[]
+        }
+    const savedSelectedKeys = Array.isArray(parsed)
+      ? parsed
+      : Array.isArray(parsed?.selectedKeys)
+        ? parsed.selectedKeys
+        : []
+    const savedOrder = Array.isArray(parsed) ? parsed : (parsed?.order ?? [])
     const availableKeys = new Set<string>(defaultTableColumnKeys)
-    const nextKeys = savedKeys.filter((key) => availableKeys.has(key))
+    const nextKeys = savedSelectedKeys.filter((key) => availableKeys.has(key))
     if (!nextKeys.includes('platform2Usage')) {
       nextKeys.push('platform2Usage')
     }
     if (nextKeys.length > 0) {
       selectedTableColumnKeys.value = Array.from(new Set([...fixedTableColumnKeys, ...nextKeys]))
     }
+    tableColumnOrder.value = normalizeTableColumnOrder(savedOrder)
   } catch {}
 }
 
@@ -1128,7 +1208,34 @@ watch(
       selectedTableColumnKeys.value = normalizedKeys
       return
     }
-    localStorage.setItem(tableColumnStorageKey, JSON.stringify(normalizedKeys))
+    localStorage.setItem(
+      tableColumnStorageKey,
+      JSON.stringify({
+        selectedKeys: normalizedKeys,
+        order: normalizeTableColumnOrder(tableColumnOrder.value),
+      }),
+    )
+  },
+  { deep: true },
+)
+watch(
+  tableColumnOrder,
+  (order) => {
+    const normalizedOrder = normalizeTableColumnOrder(order)
+    const changed =
+      normalizedOrder.length !== order.length ||
+      normalizedOrder.some((key, index) => key !== order[index])
+    if (changed) {
+      tableColumnOrder.value = normalizedOrder
+      return
+    }
+    localStorage.setItem(
+      tableColumnStorageKey,
+      JSON.stringify({
+        selectedKeys: selectedTableColumnKeys.value,
+        order: normalizedOrder,
+      }),
+    )
   },
   { deep: true },
 )
@@ -1471,10 +1578,39 @@ const escapeForHtml = (value: string | number) => {
   }
 
   .table-column-group {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    row-gap: 10px;
-    column-gap: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .table-column-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border: 1px solid #ebeef5;
+    border-radius: 6px;
+    background: #fff;
+    cursor: move;
+    transition: border-color 0.2s, background-color 0.2s;
+
+    .drag-icon {
+      color: #909399;
+    }
+
+    &:hover {
+      border-color: #c6e2ff;
+      background: #f5f7fa;
+    }
+
+    &.drag-over {
+      border-color: #409eff;
+      background: #ecf5ff;
+    }
+
+    &.dragging {
+      opacity: 0.6;
+    }
   }
 
   .table-card {

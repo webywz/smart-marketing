@@ -66,6 +66,7 @@
         </el-form>
 
         <div class="header-actions">
+          <el-button @click="openPlatformTagDialog">平台标签管理</el-button>
           <el-button
             type="primary"
             @click="handleCreateTag"
@@ -184,6 +185,42 @@
         </span>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="platformTagDialog.visible" title="平台标签管理" width="640px">
+      <el-form :inline="true" :model="platformTagForm" @submit.prevent>
+        <el-form-item label="标签名称">
+          <el-input
+            v-model="platformTagForm.name"
+            placeholder="请输入平台标签名称"
+            maxlength="20"
+            show-word-limit
+            style="width: 260px"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="submitPlatformTag">
+            {{ platformTagForm.id ? '保存' : '新增' }}
+          </el-button>
+          <el-button v-if="platformTagForm.id" @click="resetPlatformTagForm">取消编辑</el-button>
+        </el-form-item>
+      </el-form>
+
+      <el-table :data="platformTags" style="width: 100%" max-height="420">
+        <el-table-column prop="name" label="标签名称" min-width="180" />
+        <el-table-column prop="materialCount" label="关联素材数" width="120" align="center" />
+        <el-table-column prop="updateTime" label="更新时间" width="180" />
+        <el-table-column label="操作" width="150" align="center" fixed="right">
+          <template #default="{ row }">
+            <el-button link type="primary" size="small" @click="handleEditPlatformTag(row)"
+              >编辑</el-button
+            >
+            <el-button link type="danger" size="small" @click="handleDeletePlatformTag(row)"
+              >删除</el-button
+            >
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
@@ -196,10 +233,19 @@ import request from '@/utils/request'
 import type { TagGroup, Tag } from '@/mock/materialData'
 import { getCurrentTime } from '@/utils/time'
 
+interface PlatformTag {
+  id: string
+  name: string
+  materialCount: number
+  createTime: string
+  updateTime: string
+}
+
 // --- State ---
 const loading = ref(false)
 const groups = ref<TagGroup[]>([])
 const tags = ref<Tag[]>([])
+const platformTags = ref<PlatformTag[]>([])
 
 // Selection / Filtering
 const currentGroupId = ref<string>('') // empty means 'All'
@@ -228,6 +274,44 @@ const tagFormRef = ref<FormInstance>()
 const tagRules = {
   name: [{ required: true, message: '请输入标签名称', trigger: 'blur' }],
   groupId: [{ required: true, message: '请选择所属分组', trigger: 'change' }],
+}
+const platformTagDialog = ref({ visible: false })
+const platformTagForm = ref<{ id: string; name: string }>({ id: '', name: '' })
+
+const buildPlatformTagList = (
+  source: unknown,
+  materialTagCountMap: Map<string, number>,
+): PlatformTag[] => {
+  const normalized = Array.isArray(source) ? source : []
+  const result = normalized
+    .map((item, index) => {
+      const row = item as Partial<PlatformTag>
+      const name = String(row?.name || '').trim()
+      if (!name) return null
+      const now = getCurrentTime()
+      return {
+        id: String(row?.id || `pt_${Date.now()}_${index}`),
+        name,
+        materialCount: materialTagCountMap.get(name) || 0,
+        createTime: String(row?.createTime || now),
+        updateTime: String(row?.updateTime || now),
+      }
+    })
+    .filter((item): item is PlatformTag => Boolean(item))
+
+  const exists = new Set(result.map((item) => item.name))
+  materialTagCountMap.forEach((count, name) => {
+    if (exists.has(name)) return
+    const now = getCurrentTime()
+    result.push({
+      id: `pt_seed_${Date.now()}_${name}`,
+      name,
+      materialCount: count,
+      createTime: now,
+      updateTime: now,
+    })
+  })
+  return result.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'))
 }
 
 // --- Computed ---
@@ -269,12 +353,45 @@ const searchableGroups = computed(() => {
 const fetchData = async () => {
   loading.value = true
   try {
-    const [groupsRes, tagsRes] = await Promise.all([
+    const [groupsRes, tagsRes, platformTagsRes, materialsRes] = await Promise.all([
       request.get('/tagGroups'),
       request.get('/tags'),
+      request.get('/platformTags'),
+      request.get('/materials'),
     ])
     groups.value = (groupsRes as unknown as TagGroup[]) || []
     tags.value = (tagsRes as unknown as Tag[]) || []
+
+    const materialTagCountMap = new Map<string, number>()
+    ;((materialsRes as unknown as Array<{ platformTags?: string[] }>) || []).forEach((material) => {
+      ;(material.platformTags || []).forEach((tagName) => {
+        const name = String(tagName || '').trim()
+        if (!name) return
+        materialTagCountMap.set(name, (materialTagCountMap.get(name) || 0) + 1)
+      })
+    })
+    const normalizedPlatformTags = buildPlatformTagList(platformTagsRes, materialTagCountMap)
+    platformTags.value = normalizedPlatformTags
+
+    const existingByName = new Set(
+      ((platformTagsRes as unknown as Array<{ name?: string }>) || [])
+        .map((item) => String(item?.name || '').trim())
+        .filter(Boolean),
+    )
+    const missing = normalizedPlatformTags.filter((item) => !existingByName.has(item.name))
+    if (missing.length > 0) {
+      await Promise.all(
+        missing.map((item) =>
+          request.post('/platformTags', {
+            id: item.id,
+            name: item.name,
+            materialCount: item.materialCount,
+            createTime: item.createTime,
+            updateTime: item.updateTime,
+          }),
+        ),
+      )
+    }
   } catch (e) {
     ElMessage.error('获取数据失败')
   } finally {
@@ -484,12 +601,91 @@ const applyCustomPageSize = () => {
   customPageSizeInput.value = undefined // Reset input
 }
 
+const openPlatformTagDialog = () => {
+  platformTagDialog.value.visible = true
+  resetPlatformTagForm()
+}
+
+const resetPlatformTagForm = () => {
+  platformTagForm.value = { id: '', name: '' }
+}
+
+const submitPlatformTag = async () => {
+  const name = platformTagForm.value.name.trim()
+  if (!name) {
+    ElMessage.warning('请输入平台标签名称')
+    return
+  }
+  const duplicate = platformTags.value.find(
+    (item) =>
+      item.name.toLowerCase() === name.toLowerCase() && item.id !== platformTagForm.value.id,
+  )
+  if (duplicate) {
+    ElMessage.warning('平台标签名称重复')
+    return
+  }
+
+  const now = getCurrentTime()
+  try {
+    if (platformTagForm.value.id) {
+      const current = platformTags.value.find((item) => item.id === platformTagForm.value.id)
+      if (!current) return
+      const payload: PlatformTag = {
+        ...current,
+        name,
+        updateTime: now,
+      }
+      await request.put(`/platformTags/${payload.id}`, payload)
+      const index = platformTags.value.findIndex((item) => item.id === payload.id)
+      if (index > -1) platformTags.value[index] = payload
+      ElMessage.success('平台标签已更新')
+    } else {
+      const payload: PlatformTag = {
+        id: `pt_${Date.now()}`,
+        name,
+        materialCount: 0,
+        createTime: now,
+        updateTime: now,
+      }
+      await request.post('/platformTags', payload)
+      platformTags.value.unshift(payload)
+      ElMessage.success('平台标签已创建')
+    }
+    resetPlatformTagForm()
+  } catch (e) {
+    ElMessage.error('操作失败')
+  }
+}
+
+const handleEditPlatformTag = (tag: PlatformTag) => {
+  platformTagForm.value = {
+    id: tag.id,
+    name: tag.name,
+  }
+}
+
+const handleDeletePlatformTag = (tag: PlatformTag) => {
+  const tip =
+    tag.materialCount > 0
+      ? `该平台标签关联了 ${tag.materialCount} 个素材，删除后将无法在筛选中选择。确定删除？`
+      : `确定删除平台标签 "${tag.name}" 吗？`
+  ElMessageBox.confirm(tip, '提示', { type: tag.materialCount > 0 ? 'warning' : 'info' })
+    .then(async () => {
+      await request.delete(`/platformTags/${tag.id}`)
+      platformTags.value = platformTags.value.filter((item) => item.id !== tag.id)
+      if (platformTagForm.value.id === tag.id) {
+        resetPlatformTagForm()
+      }
+      ElMessage.success('删除成功')
+    })
+    .catch(() => {})
+}
+
 // --- Utils ---
 const getGroupName = (groupId: string) => {
   return groups.value.find((g) => g.id === groupId)?.name || '未知分组'
 }
 </script>
-
 <style scoped lang="scss">
 .tag-management-container {
   display: flex;
