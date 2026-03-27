@@ -2,13 +2,25 @@
   <div class="page-container">
     <div class="iframe-header">
       <h2>图片快速生产</h2>
-      <el-button v-if="canUploadToLibrary" type="primary" @click="openUploadDialog"
-        >上传素材库</el-button
-      >
+      <div class="header-actions">
+        <el-button
+          :type="isIframePaused ? 'warning' : 'primary'"
+          @click="toggleIframePause"
+        >
+          {{ isIframePaused ? '继续' : '暂停' }}
+        </el-button>
+        <el-button v-if="canUploadToLibrary" type="primary" @click="openUploadDialog"
+          >上传素材库</el-button
+        >
+      </div>
     </div>
     <div class="workbench">
-      <div class="iframe-wrapper">
+      <div class="iframe-wrapper" :class="{ paused: isIframePaused }">
         <iframe :src="iframeSrc" frameborder="0" width="100%" height="100%" allowfullscreen title="图片快速生产"></iframe>
+        <div v-if="isIframePaused" class="iframe-mask">
+          <span>当前已暂停交互</span>
+          <el-button type="primary" @click="toggleIframePause">继续</el-button>
+        </div>
       </div>
     </div>
     <el-dialog
@@ -77,16 +89,20 @@ const toolOptions = [
 const defaultToolKey = 'none_keys'
 
 const normalizeToolKey = (value: unknown) => {
-  if (typeof value !== 'string') {
+  const rawValue = Array.isArray(value) ? value[0] : value
+  if (typeof rawValue !== 'string') {
     return defaultToolKey
   }
-  return toolOptions.some((item) => item.key === value) ? value : defaultToolKey
+  const normalizedValue = rawValue.trim()
+  return toolOptions.some((item) => item.key === normalizedValue) ? normalizedValue : defaultToolKey
 }
 
 const activeToolKey = ref(normalizeToolKey(route.query.tool))
 
 const iframeSrc = computed(() => `${baseUrl}/${activeToolKey.value}`)
 const canUploadToLibrary = computed(() => activeToolKey.value === 'none_keys')
+const isText2iconTool = computed(() => activeToolKey.value === 'text2icon')
+const isIframePaused = ref(false)
 
 const uploadDialogVisible = ref(false)
 const uploadRef = ref<UploadInstance>()
@@ -100,6 +116,9 @@ watch(
     const normalized = normalizeToolKey(tool)
     if (normalized !== activeToolKey.value) {
       activeToolKey.value = normalized
+    }
+    if (normalized !== 'text2icon') {
+      isIframePaused.value = false
     }
   },
 )
@@ -117,6 +136,15 @@ const handleToolChange = (toolKey: string) => {
       tool: normalized,
     },
   })
+}
+
+const toggleIframePause = () => {
+  if (!isText2iconTool.value) {
+    handleToolChange('text2icon')
+    isIframePaused.value = true
+    return
+  }
+  isIframePaused.value = !isIframePaused.value
 }
 
 const loadFolderList = async () => {
@@ -222,6 +250,12 @@ onMounted(() => {
     }
   }
 
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
   .upload-folder-select {
     width: 100%;
   }
@@ -278,12 +312,32 @@ onMounted(() => {
     background: #fff;
     border-radius: 8px;
     overflow: hidden;
+    position: relative;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
 
     iframe {
       display: block;
       border: none;
     }
+  }
+
+  .iframe-wrapper.paused iframe {
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .iframe-mask {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+    font-size: 16px;
+    z-index: 2;
   }
 }
 
