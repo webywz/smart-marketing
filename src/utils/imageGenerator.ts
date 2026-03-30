@@ -15,6 +15,7 @@ export type TextToImagePayload = {
 
 const IMAGE_GENERATOR_ENDPOINT = 'http://115.190.58.190:7100/api/v1/generate/multi-image-to-image'
 const TEXT_IMAGE_GENERATOR_ENDPOINT = 'http://115.190.58.190:7100/api/v1/generate/text-to-image'
+const FILE_UPLOAD_ENDPOINT = 'https://pluginapi.laidianbanlv.cn/file/upload'
 
 const isString = (value: unknown): value is string => typeof value === 'string'
 
@@ -46,21 +47,64 @@ export const extractImageUrls = (raw: unknown) => {
   return Array.from(bucket)
 }
 
-export const fileToBase64 = (file: File) =>
-  new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      const raw = String(reader.result || '')
-      const base64 = raw.includes(',') ? raw.split(',')[1] || '' : raw
-      if (!base64) {
-        reject(new Error('图片转码失败'))
-        return
-      }
-      resolve(base64)
+const parseJsonResponse = async (response: Response) => {
+  const text = await response.text()
+  if (!text) return null
+  try {
+    return JSON.parse(text)
+  } catch {
+    return { raw: text }
+  }
+}
+
+const readUploadUrl = (data: unknown) => {
+  const imageUrls = extractImageUrls(data)
+  if (imageUrls.length > 0) {
+    return imageUrls[0]
+  }
+  if (data && typeof data === 'object') {
+    const record = data as Record<string, unknown>
+    const direct = record.url
+    if (typeof direct === 'string' && direct.trim()) {
+      return direct.trim()
     }
-    reader.onerror = () => reject(new Error('图片读取失败'))
-    reader.readAsDataURL(file)
+    if (record.data && typeof record.data === 'object') {
+      const nested = (record.data as Record<string, unknown>).url
+      if (typeof nested === 'string' && nested.trim()) {
+        return nested.trim()
+      }
+    }
+  }
+  if (typeof data === 'string' && data.trim()) {
+    return data.trim()
+  }
+  return ''
+}
+
+export const uploadImageFile = async (file: File, signal?: AbortSignal) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  const response = await fetch(FILE_UPLOAD_ENDPOINT, {
+    method: 'POST',
+    body: formData,
+    signal,
   })
+  const data = await parseJsonResponse(response)
+  if (!response.ok) {
+    throw new Error(`图片上传失败: ${response.status}`)
+  }
+  if (data && typeof data === 'object') {
+    const code = (data as Record<string, unknown>).code
+    if (code !== undefined && ![0, 200, '0', '200'].includes(code as never)) {
+      throw new Error('图片上传失败: 接口返回异常')
+    }
+  }
+  const imageUrl = readUploadUrl(data)
+  if (!imageUrl) {
+    throw new Error('图片上传失败: 未返回可用图片地址')
+  }
+  return imageUrl
+}
 
 export const generateImageToImage = async (payload: MultiImageToImagePayload, signal?: AbortSignal) => {
   const normalizedPayload: MultiImageToImagePayload = {

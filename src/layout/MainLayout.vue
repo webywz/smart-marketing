@@ -23,7 +23,6 @@
             <el-menu-item index="/material/album">素材专辑管理</el-menu-item>
             <el-menu-item index="/material/list">素材管理</el-menu-item>
             <el-menu-item index="/material/tag">素材标签</el-menu-item>
-            <el-menu-item index="/material/quick-image">图片快速生产</el-menu-item>
             <el-menu-item index="/material/text-image-studio">文生图配置生成</el-menu-item>
             <el-menu-item index="/material/image-generation">图生图任务中心</el-menu-item>
             <el-menu-item index="/material/icon-generation">图示生成中心</el-menu-item>
@@ -71,7 +70,6 @@
               <el-menu-item index="/material/album">素材专辑管理</el-menu-item>
               <el-menu-item index="/material/list">素材管理</el-menu-item>
               <el-menu-item index="/material/tag">素材标签</el-menu-item>
-              <el-menu-item index="/material/quick-image">图片快速生产</el-menu-item>
               <el-menu-item index="/material/text-image-studio">文生图配置生成</el-menu-item>
               <el-menu-item index="/material/image-generation">图生图任务中心</el-menu-item>
               <el-menu-item index="/material/icon-generation">图示生成中心</el-menu-item>

@@ -68,10 +68,11 @@
 <script setup lang="ts">
 import { UploadFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import type { UploadInstance, UploadUserFile } from 'element-plus'
+import type { UploadInstance, UploadRawFile, UploadUserFile } from 'element-plus'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { type Material } from '@/mock/materialData'
+import { uploadImageFile } from '@/utils/imageGenerator'
 import request from '@/utils/request'
 import { getCurrentTime } from '@/utils/time'
 
@@ -173,6 +174,8 @@ const handleFileChange = (_: UploadUserFile, files: UploadUserFile[]) => {
   fileList.value = files
 }
 
+const isUploadRawFile = (file: UploadUserFile['raw']): file is UploadRawFile => Boolean(file)
+
 const handleUploadDialogClose = () => {
   uploadRef.value?.clearFiles()
   fileList.value = []
@@ -187,33 +190,42 @@ const submitUpload = async () => {
     ElMessage.warning('请选择素材目录')
     return
   }
+  const rawFiles = fileList.value.map((file) => file.raw).filter(isUploadRawFile)
+  if (rawFiles.length === 0) {
+    ElMessage.warning('上传文件无效，请重新选择')
+    return
+  }
   const currentTime = getCurrentTime()
-  const newMaterials: Material[] = fileList.value.map((file) => {
-    const localUrl = file.raw?.type.startsWith('image/') ? URL.createObjectURL(file.raw) : ''
-    return {
-      id: `m${Date.now()}${Math.random().toString(36).substring(2, 8)}`,
-      name: file.name,
-      type: file.raw?.type || 'image/png',
-      url: localUrl,
-      thumbnail: localUrl,
-      size: file.size || 0,
-      createTime: currentTime,
-      updateTime: currentTime,
-      designer: '上传者',
-      creator: '上传者',
-      status: 'enabled',
-      folderId: selectedFolderId.value,
-      tags: [],
-      platformTags: [],
-      auditStatus: 'pending',
-      usageCount: 0,
-      platform1Usage: 0,
-      platform2Usage: 0,
-      approvalRate: 0,
-      isFavorite: false,
-    }
-  })
   try {
+    const uploadedUrls = await Promise.all(rawFiles.map((file) => uploadImageFile(file)))
+    const newMaterials: Material[] = rawFiles.map((file, index) => {
+      const uploadedUrl = uploadedUrls[index]
+      if (!uploadedUrl) {
+        throw new Error('上传接口未返回可用图片地址')
+      }
+      return {
+        id: `m${Date.now()}${Math.random().toString(36).substring(2, 8)}`,
+        name: file.name,
+        type: file.type || 'image/png',
+        url: uploadedUrl,
+        thumbnail: uploadedUrl,
+        size: file.size || 0,
+        createTime: currentTime,
+        updateTime: currentTime,
+        designer: '上传者',
+        creator: '上传者',
+        status: 'enabled',
+        folderId: selectedFolderId.value,
+        tags: [],
+        platformTags: [],
+        auditStatus: 'pending',
+        usageCount: 0,
+        platform1Usage: 0,
+        platform2Usage: 0,
+        approvalRate: 0,
+        isFavorite: false,
+      }
+    })
     await Promise.all(newMaterials.map((material) => request.post('/materials', material)))
     ElMessage.success(`成功上传 ${newMaterials.length} 张图片到素材库`)
     uploadDialogVisible.value = false

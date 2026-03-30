@@ -121,9 +121,9 @@
 <script setup lang="ts">
 import { UploadFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import type { UploadUserFile } from 'element-plus'
+import type { UploadRawFile, UploadUserFile } from 'element-plus'
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
-import { fileToBase64, generateImageToImage } from '@/utils/imageGenerator'
+import { generateImageToImage, uploadImageFile } from '@/utils/imageGenerator'
 
 type TaskStatus = 'running' | 'paused' | 'cancelled' | 'completed' | 'failed'
 
@@ -217,6 +217,8 @@ const statusTagType = (status: TaskStatus) => {
   return 'success'
 }
 
+const isUploadRawFile = (file: UploadUserFile['raw']): file is UploadRawFile => Boolean(file)
+
 const onUploadChange = (_file: UploadUserFile, files: UploadUserFile[]) => {
   fileList.value = files
 }
@@ -250,59 +252,70 @@ const abortTaskRequest = (taskId: string) => {
 
 const runTask = (taskId: string) => {
   stopTaskTimer(taskId)
-  const timer = window.setInterval(async () => {
+  const task = getTaskById(taskId)
+  if (!task || task.status !== 'running' || task.requestStarted) {
+    return
+  }
+  if (task.sourceFiles.length === 0) {
+    task.status = 'failed'
+    task.requestStarted = false
+    ElMessage.error('任务缺少源图，未触发上传接口，请重新上传后新建任务')
+    return
+  }
+  task.progress = Math.max(task.progress, 10)
+  task.requestStarted = true
+  const controller = new AbortController()
+  controllerMap.set(taskId, controller)
+  const timer = window.setInterval(() => {
     const task = getTaskById(taskId)
     if (!task || task.status !== 'running') {
       stopTaskTimer(taskId)
       return
     }
-    if (!task.requestStarted) {
-      task.progress = Math.min(task.progress + 10, 60)
-      if (task.progress < 60) {
-        return
-      }
-      task.requestStarted = true
-      const controller = new AbortController()
-      controllerMap.set(taskId, controller)
-      try {
-        const binaryData = await Promise.all(task.sourceFiles.map((file) => fileToBase64(file)))
-        const prompt = [form.prompt, form.keywords, form.sellingPoints, form.color, `模式:${form.mode}`]
-          .filter(Boolean)
-          .join(' | ')
-        const response = await generateImageToImage(
-          {
-            prompt,
-            size: '2K',
-            sequential_image_generation: form.quantity > 1 ? 'auto' : 'disabled',
-            generation_num: form.quantity,
-            images: binaryData,
-          },
-          controller.signal,
-        )
-        if (response.imageUrls.length === 0) {
-          throw new Error('接口未返回可用图片地址')
-        }
-        task.resultUrls = response.imageUrls.slice(0, form.quantity)
-        task.progress = 100
-        task.status = 'completed'
-        stopTaskTimer(taskId)
-        controllerMap.delete(taskId)
-        ElMessage.success(`${task.name} 已完成`)
-      } catch (error) {
-        const message = error instanceof Error ? error.message : '生成失败'
-        if (message.toLowerCase().includes('abort')) {
-          task.status = 'paused'
-        } else {
-          task.status = 'failed'
-          ElMessage.error(message)
-        }
-        task.requestStarted = false
-        stopTaskTimer(taskId)
-        controllerMap.delete(taskId)
-      }
-    }
+    task.progress = Math.min(task.progress + 10, 90)
   }, 1000)
   timerMap.set(taskId, timer)
+  ;(async () => {
+    try {
+      const uploadedUrls = await Promise.all(task.sourceFiles.map((file) => uploadImageFile(file, controller.signal)))
+      if (uploadedUrls.length === 0) {
+        throw new Error('上传接口未返回可用图片地址')
+      }
+      const prompt = [form.prompt, form.keywords, form.sellingPoints, form.color, `模式:${form.mode}`]
+        .filter(Boolean)
+        .join(' | ')
+      const response = await generateImageToImage(
+        {
+          prompt,
+          size: '2K',
+          sequential_image_generation: form.quantity > 1 ? 'auto' : 'disabled',
+          generation_num: form.quantity,
+          images: uploadedUrls,
+        },
+        controller.signal,
+      )
+      if (response.imageUrls.length === 0) {
+        throw new Error('接口未返回可用图片地址')
+      }
+      task.resultUrls = response.imageUrls.slice(0, form.quantity)
+      task.progress = 100
+      task.status = 'completed'
+      stopTaskTimer(taskId)
+      controllerMap.delete(taskId)
+      ElMessage.success(`${task.name} 已完成`)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '生成失败'
+      if ((error instanceof DOMException && error.name === 'AbortError') || message.toLowerCase().includes('abort')) {
+        task.status = 'paused'
+      } else {
+        task.status = 'failed'
+        ElMessage.error(message)
+      }
+      task.requestStarted = false
+      stopTaskTimer(taskId)
+      controllerMap.delete(taskId)
+    }
+  })()
 }
 
 const createTask = async () => {
@@ -310,7 +323,7 @@ const createTask = async () => {
     ElMessage.warning('请先上传至少一张图片')
     return
   }
-  const rawFiles = fileList.value.map((item) => item.raw).filter((file): file is File => file instanceof File)
+  const rawFiles = fileList.value.map((item) => item.raw).filter(isUploadRawFile)
   if (rawFiles.length === 0) {
     ElMessage.warning('上传文件无效，请重新上传')
     return
