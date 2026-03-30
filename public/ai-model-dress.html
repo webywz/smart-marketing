@@ -96,7 +96,7 @@
     <script>
       const APP_CONFIG = {
         baseUrl: 'http://zlhub.xiaowaiyou.cn/zhonglian/api/v1/proxy/ark',
-        uploadUrl: 'https://zlhub.xiaowaiyou.cn/zhonglian/api/v1/storage/upload',
+        uploadUrl: 'https://pluginapi.laidianbanlv.cn/file/upload',
         model: 'doubao-seedance-2.0',
         token: 'Bearer sk-qaTo2rCaRLCXGZ6U2tCrnwSK92UKXGQk4gFxozNEdADA4kzl',
         defaultImageUrl: 'Asset://Asset-20260327143152-w7v6t'
@@ -289,10 +289,13 @@
           method: 'POST',
           body: formData
         })
-        if (data?.code !== 0 || !data?.data?.url) {
+        const rawLink = data?.data?.link || data?.data?.url || ''
+        const uploadedLink = String(rawLink).trim().replace(/^`+|`+$/g, '')
+        const successCode = Number(data?.code)
+        if ((successCode !== 200 && successCode !== 0) || !uploadedLink) {
           throw new Error(`上传失败：${JSON.stringify(data)}`)
         }
-        return data.data.url
+        return uploadedLink
       }
 
       function extractTaskId(resp) {
