@@ -790,14 +790,16 @@ const tableColumnOptions = [
   { key: 'approvalRate', label: '卡审率 (%)', fixed: false },
   { key: 'tags', label: '标签', fixed: false },
 ] as const
+type TableColumnOption = (typeof tableColumnOptions)[number]
+type TableColumnKey = TableColumnOption['key']
 const fixedTableColumnKeys = tableColumnOptions
   .filter((column) => column.fixed)
   .map((column) => column.key)
 const defaultTableColumnKeys = tableColumnOptions.map((column) => column.key)
-const selectedTableColumnKeys = ref<string[]>([...defaultTableColumnKeys])
-const tableColumnOrder = ref<string[]>([...defaultTableColumnKeys])
-const draggingColumnKey = ref('')
-const dragOverColumnKey = ref('')
+const selectedTableColumnKeys = ref<TableColumnKey[]>([...defaultTableColumnKeys])
+const tableColumnOrder = ref<TableColumnKey[]>([...defaultTableColumnKeys])
+const draggingColumnKey = ref<TableColumnKey | ''>('')
+const dragOverColumnKey = ref<TableColumnKey | ''>('')
 
 // Pagination
 const currentPage = ref(1)
@@ -914,7 +916,7 @@ const tableColumnMap = new Map(tableColumnOptions.map((column) => [column.key, c
 const orderedTableColumns = computed(() =>
   tableColumnOrder.value
     .map((key) => tableColumnMap.get(key))
-    .filter((column): column is (typeof tableColumnOptions)[number] => Boolean(column)),
+    .filter((column): column is TableColumnOption => Boolean(column)),
 )
 const orderedVisibleTableColumns = computed(() =>
   orderedTableColumns.value.filter((column) => isColumnVisible(column.key)),
@@ -1117,7 +1119,7 @@ const resetExportFields = () => {
   selectedExportFieldKeys.value = [...defaultExportFieldKeys]
 }
 
-const isColumnVisible = (key: string) => selectedTableColumnKeys.value.includes(key)
+const isColumnVisible = (key: TableColumnKey) => selectedTableColumnKeys.value.includes(key)
 
 const selectAllTableColumns = () => {
   selectedTableColumnKeys.value = [...defaultTableColumnKeys]
@@ -1129,15 +1131,17 @@ const resetTableColumns = () => {
 }
 
 const normalizeTableColumnOrder = (keys: string[]) => {
-  const availableKeys = new Set<string>(defaultTableColumnKeys)
-  const deduped = Array.from(new Set(keys.filter((key) => availableKeys.has(key))))
+  const availableKeys = new Set<TableColumnKey>(defaultTableColumnKeys)
+  const isTableColumnKey = (key: string): key is TableColumnKey =>
+    availableKeys.has(key as TableColumnKey)
+  const deduped = Array.from(new Set(keys.filter(isTableColumnKey)))
   defaultTableColumnKeys.forEach((key) => {
     if (!deduped.includes(key)) deduped.push(key)
   })
   return deduped
 }
 
-const moveTableColumn = (dragKey: string, dropKey: string) => {
+const moveTableColumn = (dragKey: TableColumnKey, dropKey: TableColumnKey) => {
   if (!dragKey || !dropKey || dragKey === dropKey) return
   const nextOrder = [...tableColumnOrder.value]
   const fromIndex = nextOrder.indexOf(dragKey)
@@ -1148,16 +1152,17 @@ const moveTableColumn = (dragKey: string, dropKey: string) => {
   tableColumnOrder.value = nextOrder
 }
 
-const handleTableColumnDragStart = (key: string) => {
+const handleTableColumnDragStart = (key: TableColumnKey) => {
   draggingColumnKey.value = key
 }
 
-const handleTableColumnDragOver = (key: string) => {
+const handleTableColumnDragOver = (key: TableColumnKey) => {
   if (!draggingColumnKey.value || draggingColumnKey.value === key) return
   dragOverColumnKey.value = key
 }
 
-const handleTableColumnDrop = (key: string) => {
+const handleTableColumnDrop = (key: TableColumnKey) => {
+  if (!draggingColumnKey.value) return
   moveTableColumn(draggingColumnKey.value, key)
   draggingColumnKey.value = ''
   dragOverColumnKey.value = ''
@@ -1184,8 +1189,10 @@ const loadTableColumnSettings = () => {
         ? parsed.selectedKeys
         : []
     const savedOrder = Array.isArray(parsed) ? parsed : (parsed?.order ?? [])
-    const availableKeys = new Set<string>(defaultTableColumnKeys)
-    const nextKeys = savedSelectedKeys.filter((key) => availableKeys.has(key))
+    const availableKeys = new Set<TableColumnKey>(defaultTableColumnKeys)
+    const isTableColumnKey = (key: string): key is TableColumnKey =>
+      availableKeys.has(key as TableColumnKey)
+    const nextKeys = savedSelectedKeys.filter(isTableColumnKey)
     if (!nextKeys.includes('platform2Usage')) {
       nextKeys.push('platform2Usage')
     }
