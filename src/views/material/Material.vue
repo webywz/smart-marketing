@@ -504,6 +504,21 @@
               </el-select>
             </el-form-item>
           </el-col>
+          <el-col :span="24">
+            <el-form-item label="平台标签">
+              <el-select
+                v-model="metaForm.platformTags"
+                multiple
+                allow-create
+                filterable
+                default-first-option
+                placeholder="添加平台标签"
+                style="width: 100%"
+              >
+                <el-option v-for="tag in platformTagList" :key="tag" :label="tag" :value="tag" />
+              </el-select>
+            </el-form-item>
+          </el-col>
         </el-row>
       </el-form>
       <template #footer>
@@ -839,6 +854,14 @@ const filters = reactive({
 // --- Computed & Logic ---
 const getMergedTags = (material: Pick<Material, 'tags' | 'platformTags'>) =>
   Array.from(new Set([...(material.tags || []), ...(material.platformTags || [])]))
+const normalizeNameList = (list: unknown) =>
+  Array.from(
+    new Set(
+      (Array.isArray(list) ? list : [])
+        .map((item) => String(item || '').trim())
+        .filter(Boolean),
+    ),
+  )
 
 const filteredList = computed(() => {
   const result = materials.value.filter((m) => {
@@ -1346,6 +1369,8 @@ const handleDelete = (row: Material) => {
 
 const handleEditMaterial = (row: Material) => {
   metaForm.value = JSON.parse(JSON.stringify(row))
+  metaForm.value.tags = normalizeNameList(metaForm.value.tags)
+  metaForm.value.platformTags = normalizeNameList(metaForm.value.platformTags)
   metaDialogVisible.value = true
 }
 
@@ -1354,8 +1379,31 @@ const submitMeta = async () => {
   if (index !== -1) {
     try {
       const updatedItem = { ...materials.value[index], ...(metaForm.value as Material) }
-      // Update time
+      updatedItem.tags = normalizeNameList(updatedItem.tags)
+      updatedItem.platformTags = normalizeNameList(updatedItem.platformTags)
       updatedItem.updateTime = getCurrentTime()
+
+      const existingPlatformTagSet = new Set(platformTagList.value)
+      const createdPlatformTags = updatedItem.platformTags.filter(
+        (tag) => !existingPlatformTagSet.has(tag),
+      )
+      if (createdPlatformTags.length > 0) {
+        const now = getCurrentTime()
+        await Promise.all(
+          createdPlatformTags.map((name) =>
+            request.post('/platformTags', {
+              id: `pt_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+              name,
+              materialCount: 0,
+              createTime: now,
+              updateTime: now,
+            }),
+          ),
+        )
+        platformTagList.value = Array.from(
+          new Set([...platformTagList.value, ...createdPlatformTags]),
+        ).sort((a, b) => a.localeCompare(b, 'zh-CN'))
+      }
 
       await request.put(`/materials/${metaForm.value.id}`, updatedItem)
       materials.value[index] = updatedItem
