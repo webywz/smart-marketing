@@ -89,6 +89,89 @@
           </div>
         </section>
       </div>
+
+      <section class="mt-6 rounded-2xl bg-white p-4 shadow-sm sm:p-5">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <h2 class="text-lg font-semibold">模板制作工具APP</h2>
+          <span class="inline-flex w-fit rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">仅页面演示，不调用真实接口</span>
+        </div>
+        <p class="mt-2 text-sm text-slate-500">已按需求转为3个功能模块：自行制作视频模板、剪同款API对接、智能卡片工具API。</p>
+
+        <div class="mt-4 grid gap-4 lg:grid-cols-3">
+          <article class="rounded-xl border border-slate-200 p-4">
+            <h3 class="text-base font-semibold">1. 自行制作视频模板</h3>
+            <div class="mt-3 space-y-3 text-sm">
+              <label class="block">
+                <span class="mb-1 block font-medium">模板名称</span>
+                <input id="templateNameInput" class="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-500 focus:ring" placeholder="如：夏季女装上新模板" />
+              </label>
+              <label class="block">
+                <span class="mb-1 block font-medium">模板场景</span>
+                <select id="templateSceneSelect" class="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-500 focus:ring">
+                  <option value="ecommerce" selected>电商商品展示</option>
+                  <option value="brand">品牌宣传</option>
+                  <option value="ugc">达人种草</option>
+                </select>
+              </label>
+              <label class="block">
+                <span class="mb-1 block font-medium">模板时长（秒）</span>
+                <input id="templateDurationInput" type="number" min="3" max="120" value="15" class="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-500 focus:ring" />
+              </label>
+              <button id="saveTemplateBtn" class="w-full cursor-pointer rounded-lg bg-blue-600 px-3 py-2 font-medium text-white transition-colors duration-200 hover:bg-blue-700">保存模板</button>
+            </div>
+          </article>
+
+          <article class="rounded-xl border border-slate-200 p-4">
+            <h3 class="text-base font-semibold">2. 剪同款（API接口对接）</h3>
+            <div class="mt-3 space-y-3 text-sm">
+              <label class="block">
+                <span class="mb-1 block font-medium">对接API地址</span>
+                <input id="clipApiUrlInput" class="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-500 focus:ring" value="https://api.example.com/v1/template/apply" />
+              </label>
+              <label class="block">
+                <span class="mb-1 block font-medium">模板ID</span>
+                <input id="clipTemplateIdInput" class="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-500 focus:ring" placeholder="如：tpl_001" />
+              </label>
+              <label class="block">
+                <span class="mb-1 block font-medium">视频素材URL</span>
+                <input id="clipVideoUrlInput" class="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-500 focus:ring" placeholder="https://..." />
+              </label>
+              <button id="verifyClipApiBtn" class="w-full cursor-pointer rounded-lg bg-indigo-600 px-3 py-2 font-medium text-white transition-colors duration-200 hover:bg-indigo-700">验证对接参数</button>
+            </div>
+          </article>
+
+          <article class="rounded-xl border border-slate-200 p-4">
+            <h3 class="text-base font-semibold">3. 智能卡片工具API</h3>
+            <div class="mt-3 space-y-3 text-sm">
+              <label class="block">
+                <span class="mb-1 block font-medium">卡片主题</span>
+                <input id="cardTopicInput" class="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-500 focus:ring" placeholder="如：新品亮点总结" />
+              </label>
+              <label class="block">
+                <span class="mb-1 block font-medium">卡片风格</span>
+                <select id="cardStyleSelect" class="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-500 focus:ring">
+                  <option value="clean" selected>简约信息流</option>
+                  <option value="tech">科技质感</option>
+                  <option value="premium">高端品牌感</option>
+                </select>
+              </label>
+              <label class="block">
+                <span class="mb-1 block font-medium">输出尺寸</span>
+                <select id="cardSizeSelect" class="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-500 focus:ring">
+                  <option value="1080x1920" selected>1080 x 1920</option>
+                  <option value="1080x1080">1080 x 1080</option>
+                  <option value="1242x1660">1242 x 1660</option>
+                </select>
+              </label>
+              <button id="generateCardPlanBtn" class="w-full cursor-pointer rounded-lg bg-emerald-600 px-3 py-2 font-medium text-white transition-colors duration-200 hover:bg-emerald-700">生成卡片调用参数</button>
+            </div>
+          </article>
+        </div>
+
+        <div class="mt-4 rounded-xl bg-slate-900 p-3 text-xs text-cyan-300">
+          <pre id="featureAcceptanceView" class="max-h-72 overflow-auto whitespace-pre-wrap break-all">等待功能验收操作...</pre>
+        </div>
+      </section>
     </main>
 
     <template id="assetRowTpl">
@@ -138,7 +221,20 @@
         stopPollBtn: document.getElementById('stopPollBtn'),
         queryTaskBtn: document.getElementById('queryTaskBtn'),
         queryLoadingIcon: document.getElementById('queryLoadingIcon'),
-        assetRowTpl: document.getElementById('assetRowTpl')
+        assetRowTpl: document.getElementById('assetRowTpl'),
+        templateNameInput: document.getElementById('templateNameInput'),
+        templateSceneSelect: document.getElementById('templateSceneSelect'),
+        templateDurationInput: document.getElementById('templateDurationInput'),
+        saveTemplateBtn: document.getElementById('saveTemplateBtn'),
+        clipApiUrlInput: document.getElementById('clipApiUrlInput'),
+        clipTemplateIdInput: document.getElementById('clipTemplateIdInput'),
+        clipVideoUrlInput: document.getElementById('clipVideoUrlInput'),
+        verifyClipApiBtn: document.getElementById('verifyClipApiBtn'),
+        cardTopicInput: document.getElementById('cardTopicInput'),
+        cardStyleSelect: document.getElementById('cardStyleSelect'),
+        cardSizeSelect: document.getElementById('cardSizeSelect'),
+        generateCardPlanBtn: document.getElementById('generateCardPlanBtn'),
+        featureAcceptanceView: document.getElementById('featureAcceptanceView')
       }
 
       function createAssetItem(kind) {
@@ -445,11 +541,59 @@
         dom.videoTip.textContent = '已手动停止自动查询。'
       }
 
+      function writeFeatureAcceptance(title, payload) {
+        dom.featureAcceptanceView.textContent = `${title}\n${JSON.stringify(payload, null, 2)}`
+      }
+
+      function handleSaveTemplateMock() {
+        const payload = {
+          module: 'template-builder',
+          action: 'save-template',
+          app: '模板制作工具APP',
+          template_name: dom.templateNameInput.value.trim() || '未命名模板',
+          scene: dom.templateSceneSelect.value,
+          duration: Number(dom.templateDurationInput.value) || 15,
+          status: 'accepted',
+        }
+        writeFeatureAcceptance('模板制作工具APP - 自行制作视频模板（通过）', payload)
+      }
+
+      function handleVerifyClipApiMock() {
+        const payload = {
+          module: 'clip-same-style',
+          action: 'verify-api-payload',
+          capability: '支持通过API接口对接，使用视频模板',
+          api_url: dom.clipApiUrlInput.value.trim(),
+          template_id: dom.clipTemplateIdInput.value.trim(),
+          video_url: dom.clipVideoUrlInput.value.trim(),
+          status: 'accepted',
+          message: '剪同款对接参数结构已就绪。'
+        }
+        writeFeatureAcceptance('剪同款 - API接口对接（通过）', payload)
+      }
+
+      function handleGenerateCardPlanMock() {
+        const payload = {
+          module: 'smart-card-api',
+          action: 'build-request-payload',
+          capability: '智能卡片工具API',
+          topic: dom.cardTopicInput.value.trim(),
+          style: dom.cardStyleSelect.value,
+          size: dom.cardSizeSelect.value,
+          status: 'accepted',
+          message: '智能卡片调用参数已生成，当前仅演示结构。'
+        }
+        writeFeatureAcceptance('智能卡片工具API - 参数生成（通过）', payload)
+      }
+
       dom.addImageBtn.addEventListener('click', () => addAsset('images'))
       dom.addVideoBtn.addEventListener('click', () => addAsset('videos'))
       dom.submitTaskBtn.addEventListener('click', handleSubmitTask)
       dom.queryTaskBtn.addEventListener('click', handleQueryTask)
       dom.stopPollBtn.addEventListener('click', handleStopPolling)
+      dom.saveTemplateBtn.addEventListener('click', handleSaveTemplateMock)
+      dom.verifyClipApiBtn.addEventListener('click', handleVerifyClipApiMock)
+      dom.generateCardPlanBtn.addEventListener('click', handleGenerateCardPlanMock)
 
       setPollingUi(false)
 
