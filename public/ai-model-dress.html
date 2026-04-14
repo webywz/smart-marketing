@@ -71,7 +71,7 @@
 
           <div id="singleImageAudioPanel" class="mt-6 hidden space-y-4 rounded-2xl border border-slate-200 p-3 sm:p-4">
             <h2 class="text-base font-semibold">单图音频生成</h2>
-            <p class="text-xs text-slate-500">上传1张图片 + 音频即可生成视频，音频仅用于验收流程展示，不会提交到生成接口。</p>
+            <p class="text-xs text-slate-500">上传1张图片 + 音频即可生成视频</p>
             <label class="block text-sm">
               <span class="mb-1 block font-medium">生成模式</span>
               <select id="singleVideoMode" class="w-full rounded-xl border border-slate-200 px-3 py-2 outline-none ring-blue-500 focus:ring">
@@ -579,7 +579,7 @@
               role: 'reference_image'
             }
           ],
-          generate_audio: false,
+          generate_audio: true,
           ratio: dom.ratio.value,
           duration: Number(dom.duration.value) || 11,
           watermark: false
@@ -692,7 +692,7 @@
             ...imageItems,
             ...videoItems
           ],
-          generate_audio: false,
+          generate_audio: true,
           ratio: dom.ratio.value,
           duration: Number(dom.duration.value) || 11,
           watermark: false
