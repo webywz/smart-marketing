@@ -544,6 +544,17 @@
         return uploadLocalFile(imageState.file)
       }
 
+      async function resolveSingleAudioUrl() {
+        const audioState = state.singleImageAudio.audio
+        if (audioState.sourceType === 'url') {
+          const url = audioState.url.trim()
+          if (!url) throw new Error('单图音频模式下请填写音频URL')
+          return url
+        }
+        if (!audioState.file) throw new Error('单图音频模式下请上传音频文件')
+        return uploadLocalFile(audioState.file)
+      }
+
       function ensureAudioProvided() {
         const audioState = state.singleImageAudio.audio
         if (audioState.sourceType === 'url' && !audioState.url.trim()) {
@@ -564,6 +575,7 @@
       async function buildSingleImageAudioPayload() {
         ensureAudioProvided()
         const imageUrl = await resolveSingleImageUrl()
+        const audioUrl = await resolveSingleAudioUrl()
         const promptText = dom.prompt.value.trim()
         const mergedPrompt = `${promptText}\n${getModePromptSuffix()}`
         return {
@@ -577,6 +589,11 @@
               type: 'image_url',
               image_url: { url: imageUrl },
               role: 'reference_image'
+            },
+            {
+              type: 'audio_url',
+              audio_url: { url: audioUrl },
+              role: 'reference_audio'
             }
           ],
           generate_audio: true,
