@@ -91,16 +91,26 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getCurrentTime } from '@/utils/time'
+import { generateTextToImage } from '@/utils/imageGenerator'
 
 type TaskStatus = 'running' | 'paused'
+
+type TaskConfig = {
+  mode: string
+  color: string
+  keywords: string
+  quantity: number
+}
 
 type IconTask = {
   id: string
   name: string
   summary: string
+  config: TaskConfig
   status: TaskStatus
   progress: number
   createdAt: string
+  requestStarted: boolean
 }
 
 type IconResult = {
@@ -122,15 +132,22 @@ const creating = ref(false)
 const tasks = ref<IconTask[]>([])
 const results = ref<IconResult[]>([])
 const timerMap = new Map<string, number>()
+const controllerMap = new Map<string, AbortController>()
 const pageStorageKey = 'material-icon-generation-studio-state'
+
+type PersistedIconTask = Omit<IconTask, 'requestStarted'> & { requestStarted?: never }
 
 const persistState = () => {
   if (typeof window === 'undefined') return
+  const persistedTasks: PersistedIconTask[] = tasks.value.map((item) => {
+    const { requestStarted: _requestStarted, ...rest } = item
+    return rest
+  })
   window.localStorage.setItem(
     pageStorageKey,
     JSON.stringify({
       form,
-      tasks: tasks.value,
+      tasks: persistedTasks,
       results: results.value,
     }),
   )
@@ -143,11 +160,17 @@ const restoreState = () => {
   try {
     const parsed = JSON.parse(raw) as {
       form?: ReturnType<typeof getDefaultForm>
-      tasks?: IconTask[]
+      tasks?: PersistedIconTask[]
       results?: IconResult[]
     }
     Object.assign(form, getDefaultForm(), parsed.form || {})
-    tasks.value = Array.isArray(parsed.tasks) ? parsed.tasks : []
+    tasks.value = Array.isArray(parsed.tasks)
+      ? parsed.tasks.map((item) => ({
+          ...item,
+          status: item.status === 'running' ? 'paused' : item.status,
+          requestStarted: false,
+        }))
+      : []
     results.value = Array.isArray(parsed.results) ? parsed.results : []
   } catch {}
 }
@@ -167,12 +190,45 @@ const stopTimer = (taskId: string) => {
   }
 }
 
-const finishTask = (task: IconTask) => {
-  const count = Math.max(1, form.quantity)
-  const generated = Array.from({ length: count }, (_, index) => ({
+const abortTaskRequest = (taskId: string) => {
+  const controller = controllerMap.get(taskId)
+  if (controller) {
+    controller.abort()
+    controllerMap.delete(taskId)
+  }
+}
+
+const MAX_PROMPT_LENGTH = 300
+
+const shortenSegment = (value: string, maxLength: number) => {
+  const normalized = value.trim()
+  if (normalized.length <= maxLength) return normalized
+  return `${normalized.slice(0, Math.max(0, maxLength - 1))}…`
+}
+
+const buildTaskConfig = (): TaskConfig => ({
+  mode: form.mode,
+  color: form.color.trim() || '品牌主色',
+  keywords: form.keywords.trim(),
+  quantity: Math.min(8, Math.max(1, Number(form.quantity) || 1)),
+})
+
+const buildIconPrompt = (config: TaskConfig) => {
+  const segments = [
+    `图标风格:${config.mode}`,
+    `主题色硬约束:${config.color}`,
+    `关键词硬约束:${config.keywords || '通用电商图标'}`,
+    `数量硬约束:${config.quantity}张`,
+    '规则:图标简洁清晰,主题色占比高,禁止偏色和随机多色污染',
+  ]
+  return shortenSegment(segments.join(' | '), MAX_PROMPT_LENGTH)
+}
+
+const finishTask = (task: IconTask, imageUrls: string[]) => {
+  const generated = imageUrls.map((url, index) => ({
     id: `${task.id}_${index}`,
-    name: `${form.mode}_${index + 1}.png`,
-    url: `https://picsum.photos/seed/${encodeURIComponent(`${task.id}_${index}_${form.keywords}`)}/512/512`,
+    name: `${task.config.mode}_${index + 1}.png`,
+    url,
     createdAt: task.createdAt,
   }))
   results.value = [...generated, ...results.value]
@@ -182,32 +238,71 @@ const finishTask = (task: IconTask) => {
 
 const runTask = (taskId: string) => {
   stopTimer(taskId)
+  const task = tasks.value.find((item) => item.id === taskId)
+  if (!task || task.status !== 'running' || task.requestStarted) return
+  task.requestStarted = true
+  task.progress = Math.max(task.progress, 10)
+  const controller = new AbortController()
+  controllerMap.set(taskId, controller)
   const timer = window.setInterval(() => {
     const task = tasks.value.find((item) => item.id === taskId)
     if (!task || task.status !== 'running') {
       stopTimer(taskId)
       return
     }
-    task.progress = Math.min(task.progress + 20, 100)
-    if (task.progress >= 100) {
-      stopTimer(taskId)
-      finishTask(task)
-    }
+    task.progress = Math.min(task.progress + 10, 90)
   }, 1000)
   timerMap.set(taskId, timer)
+  ;(async () => {
+    try {
+      const response = await generateTextToImage(
+        {
+          prompt: buildIconPrompt(task.config),
+          size: '1K',
+          sequential_image_generation: task.config.quantity > 1 ? 'auto' : 'disabled',
+          generation_num: task.config.quantity,
+        },
+        controller.signal,
+      )
+      if (response.imageUrls.length === 0) {
+        throw new Error('图示生成失败：接口未返回图片')
+      }
+      task.progress = 100
+      stopTimer(taskId)
+      controllerMap.delete(taskId)
+      const finalUrls = response.imageUrls.slice(0, task.config.quantity)
+      finishTask(task, finalUrls)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '图示生成失败'
+      if (
+        (error instanceof DOMException && error.name === 'AbortError') ||
+        message.toLowerCase().includes('abort')
+      ) {
+        task.status = 'paused'
+      } else {
+        ElMessage.error(message)
+      }
+      task.requestStarted = false
+      stopTimer(taskId)
+      controllerMap.delete(taskId)
+    }
+  })()
 }
 
 const createTask = async () => {
+  const taskConfig = buildTaskConfig()
   creating.value = true
   try {
     const id = `icon_${Date.now()}`
     const task: IconTask = {
       id,
       name: `图示任务_${new Date().toLocaleTimeString()}`,
-      summary: `${form.mode} / ${form.color} / ${form.keywords || '无关键字'}`,
+      summary: `${taskConfig.mode} / ${taskConfig.color} / 数量:${taskConfig.quantity} / ${taskConfig.keywords || '无关键字'}`,
+      config: taskConfig,
       status: 'running',
       progress: 0,
       createdAt: getCurrentTime(),
+      requestStarted: false,
     }
     tasks.value = [task, ...tasks.value]
     runTask(id)
@@ -220,6 +315,8 @@ const pauseTask = (taskId: string) => {
   const task = tasks.value.find((item) => item.id === taskId)
   if (!task || task.status !== 'running') return
   task.status = 'paused'
+  task.requestStarted = false
+  abortTaskRequest(taskId)
   stopTimer(taskId)
 }
 
@@ -231,6 +328,7 @@ const resumeTask = (taskId: string) => {
 }
 
 const cancelTask = (taskId: string) => {
+  abortTaskRequest(taskId)
   stopTimer(taskId)
   tasks.value = tasks.value.filter((item) => item.id !== taskId)
   ElMessage.success('任务已取消')
@@ -238,15 +336,11 @@ const cancelTask = (taskId: string) => {
 
 onMounted(() => {
   restoreState()
-  tasks.value
-    .filter((task) => task.status === 'running')
-    .forEach((task) => {
-      runTask(task.id)
-    })
 })
 
 onBeforeUnmount(() => {
   Array.from(timerMap.keys()).forEach((taskId) => stopTimer(taskId))
+  Array.from(controllerMap.keys()).forEach((taskId) => abortTaskRequest(taskId))
 })
 
 watch(
