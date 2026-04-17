@@ -320,6 +320,15 @@ const COLOR_PRESETS: ColorPreset[] = [
   },
 ]
 
+const getDefaultColorPreset = (): ColorPreset =>
+  COLOR_PRESETS[0] ?? {
+    name: '品牌主色',
+    aliases: ['品牌主色', '品牌色', 'brand', 'brand color'],
+    rule: '主色严格使用品牌主色，画面其他主题色仅做低饱和陪衬，不得喧宾夺主',
+    palette: ['#409EFF', '#66B1FF', '#8CC5FF'],
+    forbidden: '高饱和杂色、霓虹荧光色',
+  }
+
 const HEX_COLOR_PATTERN = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
 
 const normalizeColorKey = (value: string) => value.trim().toLowerCase()
@@ -358,7 +367,7 @@ const buildHardColorPrompt = (color: string, palette: string[], forbidden: strin
 const resolveColorConstraint = (rawColor: string) => {
   const input = rawColor.trim()
   if (!input) {
-    const preset = COLOR_PRESETS[0]
+    const preset = getDefaultColorPreset()
     const forbidden = preset.forbidden || '与主色冲突的高饱和杂色'
     const palette = preset.palette || []
     return {
@@ -396,7 +405,7 @@ const resolveColorConstraint = (rawColor: string) => {
       fromHex: false,
     }
   }
-  const defaultPreset = COLOR_PRESETS[0]
+  const defaultPreset = getDefaultColorPreset()
   const forbidden = defaultPreset.forbidden || '与主色冲突的高饱和杂色'
   const palette = defaultPreset.palette || []
   return {
